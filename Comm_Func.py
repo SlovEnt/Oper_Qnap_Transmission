@@ -1,5 +1,6 @@
 
-import re, datetime
+import re
+import datetime
 import os
 from Oper_Mysql_Class import *
 
@@ -15,6 +16,23 @@ from Oper_Mysql_Class import *
 #     now = datetime.datetime.now()
 #     print("\033[1;31mERROR INFO: " + now.strftime("%Y-%m-%d %H:%M:%S") + ":\033[0m",msg)
 #     logFile.write(now.strftime("%Y-%m-%d %H:%M:%S") +": "+ msg+"\n")
+
+def debug():
+    now = datetime.datetime.now()
+    return "\033[1;34mDEBUG INFO: " + now.strftime("%Y-%m-%d %H:%M:%S")+":\033[0m"
+
+def errinfo():
+    now = datetime.datetime.now()
+    return "\033[1;31mERROR INFO: " + now.strftime("%Y-%m-%d %H:%M:%S")+":\033[0m"
+
+def tmpinfo(msg=""):
+    now = datetime.datetime.now()
+    if msg != "":
+        msg = " " + msg
+    return "\033[1;32mTEMP INFO: " + now.strftime("%Y-%m-%d %H:%M:%S") + msg + ":\033[0m"
+
+# print(tmpinfo(),"swerwrwe")
+
 
 def Get_Now_Date(dateFormat):
 

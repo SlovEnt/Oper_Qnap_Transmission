@@ -11,7 +11,6 @@ from multiprocessing import Pool
 # from html.parser import HTMLParser
 
 from Oper_Mysql_Class import *
-from PrintFormatLogs import *
 from Comm_Func import *
 
 sysType = platform.system()

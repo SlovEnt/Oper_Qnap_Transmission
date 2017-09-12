@@ -1,7 +1,7 @@
 import re
 import datetime
 import math
-from PrintFormatLogs import *
+from Comm_Func import *
 from Oper_Mysql_Class import *
 
 

@@ -2,7 +2,7 @@
 import re
 import datetime
 
-from PrintFormatLogs import *
+from Comm_Func import *
 from Oper_Mysql_Class import MySQL, mysqlExe
 import urllib.request
 

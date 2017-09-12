@@ -8,7 +8,6 @@ import selenium.webdriver.support.ui as ui
 from multiprocessing import Pool
 import traceback
 
-from PrintFormatLogs import *
 from Comm_Func import *
 from Oper_Mysql_Class import *
 
