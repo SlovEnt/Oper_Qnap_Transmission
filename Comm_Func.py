@@ -3,6 +3,39 @@ import re, datetime
 import os
 from Oper_Mysql_Class import *
 
+# def PrintDebugLog(msg=""):
+#     logFile = open(("XY_%s_%s_ADD_LOG.txt" % (orgCode, strDate)), "w+", encoding='utf8')
+#
+#     now = datetime.datetime.now()
+#     print("\033[1;34mDEBUG INFO: " + now.strftime("%Y-%m-%d %H:%M:%S") + ":\033[0m",msg)
+#     logFile.write(now.strftime("%Y-%m-%d %H:%M:%S") +": "+ msg+"\n")
+#
+# def PrintErrorLog(msg=""):
+#     logFile = open(("XY_%s_%s_ADD_LOG.txt" % (orgCode, strDate)), "w+", encoding='utf8')
+#     now = datetime.datetime.now()
+#     print("\033[1;31mERROR INFO: " + now.strftime("%Y-%m-%d %H:%M:%S") + ":\033[0m",msg)
+#     logFile.write(now.strftime("%Y-%m-%d %H:%M:%S") +": "+ msg+"\n")
+
+def Get_Now_Date(dateFormat):
+
+    nowDate = datetime.datetime.now()
+    Y = nowDate.strftime("%Y")
+    M = nowDate.strftime("%m")
+    D = nowDate.strftime("%d")
+
+    if dateFormat == "y-m-d":
+        strDate = str(Y)+"-"+str(int(M))+"-"+str(int(D))
+    elif dateFormat == "yyyy-mm-dd":
+        strDate = str(Y)+"-"+str(M)+"-"+str(D)
+    elif dateFormat == "yyyymmdd":
+        strDate = str(Y)+str(M)+str(D)
+    elif dateFormat == "yyyymmdd_HHMMSS":
+        strDate = nowDate.strftime("%Y%m%d_%H%M%S")
+    else:
+        return 'Get_Now_Date("%s"),入参无效' % dateFormat
+
+    return strDate
+
 def format_datetime(up_datetime):
     # 11-22&nbsp;2016
     # 02-06&nbsp;18:05
