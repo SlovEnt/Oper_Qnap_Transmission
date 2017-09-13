@@ -279,7 +279,7 @@ if __name__ == "__main__":
                         mysqlExe.ExecNonQuery(strSql.encode('utf-8'))
 
         print()
-        addTaskCnt = MaxTaskCnt - realTaskCnt - delTaskCnt
+        addTaskCnt = MaxTaskCnt - realTaskCnt + delTaskCnt
         if addTaskCnt <= 0 :
             print(debug(),"目前预设的任务总数为：%s, 已存在正在执行或等待执行的任务总数为：%s，目前无需新增任何新下载任务！" %  (MaxTaskCnt, realTaskCnt - delTaskCnt))
         else:
