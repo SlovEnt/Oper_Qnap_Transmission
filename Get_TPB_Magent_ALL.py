@@ -26,7 +26,6 @@ dcap["phantomjs.page.settings.userAgent"] = ("Mozilla/5.0 (Windows NT 6.1) Apple
 dcap["phantomjs.page.settings.loadImages"] = False # 禁止加载图片
 driver = webdriver.PhantomJS(executable_path=phantomjsPath,desired_capabilities=dcap)
 
-
 def Down_TPB_Magent_Info(singCategory):
 
     # 获取采集站点域名 统一从库中获取
