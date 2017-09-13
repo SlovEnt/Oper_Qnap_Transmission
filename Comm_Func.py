@@ -172,3 +172,20 @@ def Get_User_Name():
 #     setSeqInitVal = "update py_sequence set current_value = " + value + " WHERE seq_name = '" + seq_name + "';"
 #     mysqlExe.ExecNonQuery(setSeqInitVal.encode('utf-8'))
 
+def Get_Param_In_DB(paraDomain=""):
+    if paraDomain == "" :
+        sqlStr = "select para_domain,para_name,para_value from sys_parameter where 0=0;"
+    else:
+        sqlStr = "select para_domain,para_name,para_value from sys_parameter where 0=0 and para_domain='%s';" % paraDomain
+
+    rtnDatas = mysqlExe.ExecQuery(sqlStr.encode('utf-8'))
+    if len(rtnDatas) == 0:
+        raise ZeroDivisionError("没有取到任何参数信息，请检查参数域等设置！！")
+    else:
+        dbParamInfo = {}
+        for data in rtnDatas:
+            paramName = data[1].strip()
+            paramValue = data[2].strip()
+            dbParamInfo[paramName] = paramValue
+
+        return dbParamInfo
