@@ -24,6 +24,7 @@ dcap = dict(DesiredCapabilities.PHANTOMJS)
 dcap['phantomjs.page.customHeaders.Accept-Language'] = 'en_US'
 dcap["phantomjs.page.settings.userAgent"] = ("Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.221 Safari/537.36 SE 2.X MetaSr 1.0") #设置user-agent请求头
 dcap["phantomjs.page.settings.loadImages"] = False # 禁止加载图片
+dcap['phantomjs.page.settings.webSecurityEnabled'] = False
 driver = webdriver.PhantomJS(executable_path=phantomjsPath,desired_capabilities=dcap)
 
 def Down_TPB_Magent_Info(singCategory):
