@@ -280,9 +280,9 @@ if __name__ == "__main__":
                         mysqlExe.ExecNonQuery(strSql.encode('utf-8'))
 
         print()
-        addTaskCnt = MaxTaskCnt - realTaskCnt - delTaskCnt
+        addTaskCnt = MaxTaskCnt - realTaskCnt + delTaskCnt # 任务总数 = 最大保持的数量 减去现在正运行的数量 再加上 运行中被删除的静止任务 就是需要补充的下载任务
         if addTaskCnt <= 0 :
-            print(debug(),"目前预设的任务总数为：%s, 已存在正在执行或等待执行的任务总数为：%s，目前无需新增任何新下载任务！" %  (MaxTaskCnt, realTaskCnt - delTaskCnt))
+            print(debug(),"目前预设的任务总数为：%s, 已存在正在执行或等待执行的任务总数为：%s，目前无需新增任何新下载任务！" %  (MaxTaskCnt, realTaskCnt))
         else:
             print(debug(),"目前预设的任务总数为：%s, 已存在正在执行或等待执行的任务总数为：%s，需新增：%s 条记录！" %  (MaxTaskCnt, realTaskCnt - delTaskCnt, addTaskCnt))
 
@@ -311,6 +311,7 @@ if __name__ == "__main__":
 
         # print("\n-----------------------------------开始同步任务-----------------------------------------------")
         # _ssh_sync_files()
+
     except Exception as e:
         traceback.print_exc()
         print(e)

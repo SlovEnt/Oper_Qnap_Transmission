@@ -1,6 +1,7 @@
 
 # Program
 Config.ini
+*.jpg
 __pycache__/
 .idea/
 
