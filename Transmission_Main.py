@@ -104,6 +104,7 @@ def __Get_DB_New_Magnet(addTaskCnt):
         OR rs_name LIKE 'tokyo-Hot%'
         OR rs_name LIKE '%tokyo%hot%'
         OR rs_name LIKE '%Tokyo%hot%'
+        OR rs_name LIKE '%1pondo%'
         OR rs_name LIKE 'tokyohot%') 
     '''
     strSql = strSql + addstrSql2

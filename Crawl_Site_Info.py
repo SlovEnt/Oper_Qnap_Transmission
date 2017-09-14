@@ -3,7 +3,7 @@ import re
 import datetime
 
 from Comm_Func import *
-from Oper_Mysql_Class import MySQL, mysqlExe
+from Oper_Mysql_Class import mysqlExe
 import urllib.request
 
 if __name__ == "__main__":
