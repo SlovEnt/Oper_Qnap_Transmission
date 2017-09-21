@@ -10,8 +10,6 @@ import paramiko
 from Comm_Func import *
 from Oper_Mysql_Class import *
 
-
-
 def __Get_Session(hostDnsName,mgntPort,authStr):
     headers = {'Host': '%s:%s' % (hostDnsName,mgntPort) ,
                'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; rv:28.0) Gecko/20100101 Firefox/28.0',
@@ -156,7 +154,6 @@ def __Add_Torrents_2_Transmission(dbNewMagnet, hostDnsName, mgntPort, authStr, d
     time.sleep(1)
     conn.close()
     return data
-
 
 if __name__ == "__main__":
 
