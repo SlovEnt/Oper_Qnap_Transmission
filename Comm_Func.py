@@ -179,6 +179,7 @@ def Get_Param_In_DB(paraDomain=""):
         sqlStr = "select para_domain,para_name,para_value from sys_parameter where 0=0 and para_domain='%s';" % paraDomain
 
     rtnDatas = mysqlExe.ExecQuery(sqlStr.encode('utf-8'))
+
     if len(rtnDatas) == 0:
         raise ZeroDivisionError("没有取到任何参数信息，请检查参数域等设置！！")
     else:
