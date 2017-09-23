@@ -28,14 +28,16 @@ class MySQL:
         resList = cur.fetchall()
 
         # 查询完毕后必须关闭连接
-        # self.conn.close()
+        cur.close()
+        self.conn.close()
         return resList
 
     def ExecNonQuery(self, sql):
         cur = self.__GetConnect()
         rtn = cur.execute(sql)
         self.conn.commit()
-        # self.conn.close()
+        cur.close()
+        self.conn.close()
         return rtn
 
 
