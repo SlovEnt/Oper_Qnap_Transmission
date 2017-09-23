@@ -136,14 +136,14 @@ if __name__ == "__main__":
                     # print(debug(),"处理文件 %s ！" % fileName)
                     strCMD = '''md5sum "%s"|cut -d ' ' -f1''' % fileName
                     md5Code = __Linux_ExecCMD(sshCmd, strCMD)
-                    strSql = "select count(*) from nas_files where md5_string = '%s' and  remote_path_file <> '%s' ;" % (md5Code,fileName)
+                    strSql = "select count(*) from nas_files where md5_string = '%s' and  remote_path_file <> '%s' ;" % (md5Code,fileName.replace("'", "''"))
                     dbCursor.execute(strSql.encode('utf-8'))
                     rtnCnt = dbCursor.fetchall()[0][0]
                     if rtnCnt == 0:
                         repeatFlag = "0"
                     else:
                         repeatFlag = "1"
-                    strSql = "update nas_files set md5_string = '%s',repeat_flag = '%s' where remote_path_file = '%s';" % (md5Code, repeatFlag, fileName)
+                    strSql = "update nas_files set md5_string = '%s',repeat_flag = '%s' where remote_path_file = '%s';" % (md5Code, repeatFlag, fileName.replace("'", "''"))
                     print(debug(),strSql)
                     dbCursor.execute(strSql.encode('utf-8'))
         # else:
