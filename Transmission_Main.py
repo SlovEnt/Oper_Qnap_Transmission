@@ -254,8 +254,9 @@ if __name__ == "__main__":
                     formatCheckDate = datetime.datetime.strptime(checkDate, "%Y-%m-%d %H:%M:%S")
 
                     diffDays = (formatCheckDate - dbCheckDate).days
+                    silentDays = int(paramInfo["SILENT_DAYS"])
 
-                    if diffDays > 1 and dbDownEver == downEver :
+                    if diffDays > silentDays and dbDownEver == downEver :
 
                         print(debug(),"清理停止的下载任务：HashString = '%s' 的资源超过 %s 天没有任何进度，将自动从下载列表中清除！" % (hashString, diffDays))
 
@@ -268,7 +269,7 @@ if __name__ == "__main__":
                         # 每删除一个过期任务，需要累计加1 后面计算满100任务的时候可以冲抵差异
                         delTaskCnt = delTaskCnt + 1
 
-                    elif  diffDays <=3 and dbDownEver != downEver:
+                    elif  diffDays <= 3 and dbDownEver != downEver:
 
                         strSql = "UPDATE check_transm_down SET resource_name='%s', percent_done='%s', down_ever='%s', check_date='%s' WHERE  hash_string='%s';" % (
                             resourceName, percentDone, downEver, checkDate, hashString
