@@ -1,8 +1,8 @@
+# 清洗NAS中的影视文件 去重 重命名 等
+
 import os
 import time
-
 import pymysql
-
 import paramiko
 import hashlib
 import math

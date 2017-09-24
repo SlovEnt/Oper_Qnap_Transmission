@@ -160,13 +160,13 @@ if __name__ == "__main__":
     try:
         print()
 
-        paramInfo = Get_Param_Info("Config.ini")
-
         print(debug(),"---------------------------------- 开始任务 --------------------------------------------------")
+
         # 获取 Transmission Session 信息
-        hostDnsName = paramInfo["hostDnsName"]
-        mgntPort = paramInfo["mgntPort"]
-        authStr = paramInfo["authStr"]
+        paramInfo = Get_Param_In_DB("TM_INFO")
+        hostDnsName = paramInfo["HOST_DNS_NAME"]
+        mgntPort = paramInfo["HOST_PORT"]
+        authStr = paramInfo["AUTH_STR"]
         tmSession = __Get_Session(hostDnsName,mgntPort,authStr)
 
         print()
@@ -181,7 +181,7 @@ if __name__ == "__main__":
         torrInfoList = __Get_Torrents_Info(hostDnsName,mgntPort,authStr,tmSession)
 
         # 最终得出的实际下载总数应该为 realTaskCnt - delTaskCnt ，许要补充的数据记录数则为 MaxTaskCnt - realTaskCnt - delTaskCnt
-        MaxTaskCnt = 100  # 最大支持的下载任务记录
+        MaxTaskCnt = int(paramInfo["MAX_TASK_CNT"])  # 最大支持的下载任务记录
         delTaskCnt = 0 # 对已删除种子的计数，确认究竟删了多少条记录
         realTaskCnt = 0 # 当前实时任务数 任务状态包含 0 6 的
 
