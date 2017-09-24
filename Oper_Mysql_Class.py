@@ -28,7 +28,6 @@ class MySQL:
         resList = cur.fetchall()
 
         # 查询完毕后必须关闭连接
-        cur.close()
         self.conn.close()
         return resList
 
@@ -36,7 +35,6 @@ class MySQL:
         cur = self.__GetConnect()
         rtn = cur.execute(sql)
         self.conn.commit()
-        cur.close()
         self.conn.close()
         return rtn
 
