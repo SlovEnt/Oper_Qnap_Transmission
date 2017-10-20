@@ -97,13 +97,16 @@ def __Get_Torrents_Info(hostDnsName,mgntPort,authStr,tmSession):
 def __Get_DB_New_Magnet(addTaskCnt):
 
     strSql = "SELECT up_datetime, up_user, rs_name, rs_category, rs_type, up_size, magnet, down_flag FROM get_tpb_all_magnet WHERE 0=0 "
+    addstrSql2 = ""
     addstrSql2 = '''
-        AND (rs_name LIKE 'Tokyo-Hot%'
-        OR rs_name LIKE 'tokyo-Hot%'
-        OR rs_name LIKE '%tokyo%hot%'
-        OR rs_name LIKE '%Tokyo%hot%'
-        OR rs_name LIKE '%1pondo%'
-        OR rs_name LIKE 'tokyohot%') 
+        # AND (rs_name LIKE 'Tokyo-Hot%'
+        # OR rs_name LIKE 'tokyo-Hot%'
+        # OR rs_name LIKE '%tokyo%hot%'
+        # OR rs_name LIKE '%Tokyo%hot%'
+        # OR rs_name LIKE '%1pondo%'
+        # OR rs_name LIKE 'tokyohot%'
+        # )
+        AND rs_name LIKE '%水野朝阳%'
     '''
     strSql = strSql + addstrSql2
 
@@ -117,7 +120,7 @@ def __Get_DB_New_Magnet(addTaskCnt):
         addStrSql = addStrSql + "AND %s %s '%s' " % (data[0],data[1],data[2])
 
     strSql = strSql + addStrSql + sqlLimit
-
+    # print(strSql)
     rtnDatas = mysqlExe.ExecQuery(strSql.encode('utf-8'))
     # dataReg = re.compile(r'''btih:(.+?)&amp;dn=''')
     db_new_magnet = []
