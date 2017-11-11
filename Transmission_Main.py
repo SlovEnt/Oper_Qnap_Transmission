@@ -106,7 +106,7 @@ def __Get_DB_New_Magnet(addTaskCnt):
         # OR rs_name LIKE '%1pondo%'
         # OR rs_name LIKE 'tokyohot%'
         # )
-        AND rs_name LIKE '%水野朝阳%'
+        # AND rs_name LIKE '%水野朝阳%'
     '''
     strSql = strSql + addstrSql2
 
