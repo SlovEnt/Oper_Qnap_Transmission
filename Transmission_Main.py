@@ -112,6 +112,7 @@ def __Get_DB_New_Magnet(addTaskCnt):
 
     sqlLimit = "ORDER BY up_datetime DESC LIMIT %s" % addTaskCnt
 
+    # 取扩展表信息，用于拼装排除条件
     extStrSql = "SELECT field_name, exoression, content FROM get_tpb_exten_condition WHERE table_name = 'get_tpb_all_magnet' and flag = '1';"
     rtnDatas = mysqlExe.ExecQuery(extStrSql.encode('utf-8'))
 
