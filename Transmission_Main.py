@@ -112,7 +112,6 @@ def __Get_DB_New_Magnet(addTaskCnt):
 
     sqlLimit = "ORDER BY up_datetime DESC LIMIT %s" % addTaskCnt
 
-    # 取扩展表信息，用于拼装排除条件
     extStrSql = "SELECT field_name, exoression, content FROM get_tpb_exten_condition WHERE table_name = 'get_tpb_all_magnet' and flag = '1';"
     rtnDatas = mysqlExe.ExecQuery(extStrSql.encode('utf-8'))
 
@@ -235,7 +234,7 @@ if __name__ == "__main__":
                     mysqlExe.ExecNonQuery(strSql.encode('utf-8'))
                 if taskStatus == 0:
                     __Delete_Transmission_Down_Task(ID, hostDnsName, mgntPort, authStr, tmSession, "false")
-                    time.sleep(2)
+                    time.sleep(1)
                     print(debug(), "清理已经完结的任务：hash_string = '%s' 的资源已完成下载，且非上传状态，将自动从下载列表中清除！" % (hashString))
             else:
 
@@ -262,7 +261,7 @@ if __name__ == "__main__":
 
                     if diffDays > silentDays and dbDownEver == downEver :
 
-                        print(debug(),"清理停止的下载任务：HashString = '%s' 的资源超过 %s 天没有任何进度，将自动从下载列表中清除！" % (hashString, diffDays))
+                        print(debug(),"删除停止的下载任务：HashString = '%s' 的资源超过 %s 天没有任何进度，将自动从下载列表中清除！" % (hashString, diffDays))
 
                         strSql = "UPDATE check_transm_down SET down_flag = '9' WHERE hash_string = '%s';" % hashString
                         mysqlExe.ExecNonQuery(strSql.encode('utf-8'))
