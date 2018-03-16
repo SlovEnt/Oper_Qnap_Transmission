@@ -44,16 +44,31 @@ def GetAreaInfo(cityInfo):
 
     strSql = "select flag from `v2PySql`.`provnce_flag`  where url = '%s'" % (subUrl)
 
-    if str(len(mysqlExe.ExecQuery(strSql))) == "0":
+    while True:
+        try:
+            rtnDatas = mysqlExe.ExecQuery(strSql)
+            break
+        except Exception as e:
+            print(e)
+            time.sleep(1)
+
+    if str(len(rtnDatas)) == "0":
         rtnCnt = "2"
     else:
-        rtnCnt = mysqlExe.ExecQuery(strSql)[0][0]
+        rtnCnt = rtnDatas[0][0]
 
     if rtnCnt == "2":
         print("新增城市名为 %s %s 的数据！" % (cityInfo[1], cityInfo[0]))
         strSql = "INSERT INTO `v2PySql`.`provnce_flag` (`city_name`, `url`, `flag`) VALUES ('%s', '%s', '0');" % (cityInfo[1], subUrl)
         print(strSql)
-        mysqlExe.ExecNonQuery(strSql)
+
+        while True:
+            try:
+                mysqlExe.ExecNonQuery(strSql)
+                break
+            except Exception as e:
+                print(e)
+                time.sleep(1)
 
     if rtnCnt != "1" :
 
@@ -94,7 +109,13 @@ def GetAreaInfo(cityInfo):
                 provinceInfoDict["areaCode"] = areaCode
 
                 strSql = "select count(*) from `v2PySql`.`province_info` where post_code = '%s'" % (provinceInfoDict["postCode"])
-                rtnCnt = mysqlExe.ExecQuery(strSql)[0][0]
+                while True:
+                    try:
+                        rtnCnt = mysqlExe.ExecQuery(strSql)[0][0]
+                        break
+                    except Exception as e:
+                        print(e)
+                        time.sleep(1)
 
                 if rtnCnt == 0:
                     streetUrl = "%s%s" % ("http://tool.cncn.com", x['href'])
@@ -144,7 +165,13 @@ def GetAreaInfo(cityInfo):
                 provinceInfoDict = {}
 
         strSql = "update `v2PySql`.`provnce_flag` set flag = '1' where `url`= '%s';" % (subUrl)
-        mysqlExe.ExecNonQuery(strSql)
+        while True:
+            try:
+                mysqlExe.ExecNonQuery(strSql)
+                break
+            except Exception as e:
+                print(e)
+                time.sleep(1)
 
         time.sleep(5)
 
