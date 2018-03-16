@@ -25,36 +25,6 @@ mysqlExe = MySQL(
 head = {}
 head['User-Agent'] = 'Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.94 Safari/537.36'
 
-def getContent(url):
-    req = Request(url)
-    # 增加header头信息
-    req.add_header('User-Agent', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.75 Safari/537.36')
-    try:
-        response = urlopen(req)
-        buff = response.read()
-        html = buff.decode("utf8")
-        response.close()
-    except HTTPError as e:
-        print('The server couldn\'t ful ll the request.')
-        print('Error code: ', e.code)
-    except URLError as e:
-        print('reason:%s' % e.reason)
-    return html
-
-
-def saveContent(content, url):
-    soup = BeautifulSoup(content, "html.parser")
-    for link in soup.find("dl", {"id": "dir"}).find_all('a'):
-        title = link.get_text()
-        url = "http://www.99lib.net" + link.get("href")
-        print("title：%s" % title)
-        print("url：%s" % url)
-        html = getContent(url)
-        soup2 = BeautifulSoup(html, "html.parser")
-        content = soup2.find("div", {"id": "content"}).get_text()
-        print("content:%s" % content)
-
-
 def GetAreaInfo(cityInfo):
     provinceInfoArr = []
     provinceInfoDict = {}
@@ -64,6 +34,14 @@ def GetAreaInfo(cityInfo):
 
     subUrl = "%s%s" % (rootUrl, cityInfo[0])
 
+    # 补充新增字段信息，一次完成，后续无需使用
+    # strSql = "select city_name from `v2PySql`.`provnce_flag`  where url = '%s'" % (subUrl)
+    # cityNmae = mysqlExe.ExecQuery(strSql)
+    # if len(cityNmae) != 0 :
+    #     if cityNmae[0][0] == None :
+    #         strSql = "update `v2PySql`.`provnce_flag`  set city_name='%s' where url = '%s'" % (cityInfo[1], subUrl)
+    #         mysqlExe.ExecNonQuery(strSql)
+
     strSql = "select flag from `v2PySql`.`provnce_flag`  where url = '%s'" % (subUrl)
 
     if str(len(mysqlExe.ExecQuery(strSql))) == "0":
@@ -71,26 +49,19 @@ def GetAreaInfo(cityInfo):
     else:
         rtnCnt = mysqlExe.ExecQuery(strSql)[0][0]
 
-    print(rtnCnt,strSql)
+    if rtnCnt == "2":
+        print("新增城市名为 %s %s 的数据！" % (cityInfo[1], cityInfo[0]))
+        strSql = "INSERT INTO `v2PySql`.`provnce_flag` (`city_name`, `url`, `flag`) VALUES ('%s', '%s', '0');" % (cityInfo[1], subUrl)
+        print(strSql)
+        mysqlExe.ExecNonQuery(strSql)
 
     if rtnCnt != "1" :
-
-        if rtnCnt == "2":
-            strSql = "INSERT INTO `v2PySql`.`provnce_flag` (`url`, `flag`) VALUES ('%s', '0');" % (subUrl)
-            mysqlExe.ExecNonQuery(strSql)
 
         req = request.Request("%s%s" % (rootUrl, cityInfo[0]), headers=head)
         response = request.urlopen(req)
         html = response.read().decode('gbk')
         soup = BeautifulSoup(html, "html.parser")
-        # source = soup.find_all(class_='select J_select')
-        # print(str(soup))
 
-
-
-        # provinceResMTR = '''"</sub>\n<a href="/youbian/.+?">(.+?)邮编</a>\n<sub>'''
-        # provinceName = re.findall(res_tr, str(soup), re.S | re.M)
-        # print(provinceName)
         provinceResMTR = r'''new PCAS\('location_p', 'location_c', 'location_a', '(.+?)', '.+?', ''\)'''
         provinceName = re.findall(provinceResMTR, str(soup), re.S | re.M)[0]
 
@@ -123,16 +94,19 @@ def GetAreaInfo(cityInfo):
                     streetUrl = "%s%s" % ("http://tool.cncn.com", x['href'])
                     req = request.Request(streetUrl, headers=head)
                     response = request.urlopen(req)
+                    time.sleep(1)
                     streetUrlHtml = response.read().decode('gbk')
+                    time.sleep(1)
                     streetUrlHtmlPage = BeautifulSoup(streetUrlHtml, "html.parser")
                     # print(streetUrlHtmlPage)
                     source = streetUrlHtmlPage.find_all(class_='txt_area')[0].find_all("li")
+
                     for d in source:
                         provinceInfoDict["address"] = d.text
 
                         # print(provinceInfoDict)
 
-                        strSql = "INSERT INTO `v2PySql`.`province_info` (`province`, `city`, `area_name`, `area_code`, `post_code`, `address`) VALUES ('%s', '%s', '%s', '%s', '%s', '%s');" % (
+                        strSql = '''INSERT INTO `v2PySql`.`province_info` (`province`, `city`, `area_name`, `area_code`, `post_code`, `address`) VALUES ('%s', '%s', '%s', '%s', '%s', '%s');''' % (
                             provinceName,
                             cityInfo[1],
                             '',
@@ -140,12 +114,17 @@ def GetAreaInfo(cityInfo):
                             provinceInfoDict["postCode"],
                             provinceInfoDict["address"]
                         )
-                        print(strSql)
-                        mysqlExe.ExecNonQuery(strSql)
+                        while True:
+                            try:
+                                print(strSql)
+                                mysqlExe.ExecNonQuery(strSql)
+                                break
+                            except Exception as e:
+                                print(e)
+                                time.sleep(1)
 
-
-                    time.sleep(5)
                 else :
+
                     print("%s 已经存在 %s 条记录，跳过！" % (provinceInfoDict["postCode"], rtnCnt) )
 
                 provinceInfoDict = {}
@@ -154,6 +133,9 @@ def GetAreaInfo(cityInfo):
         mysqlExe.ExecNonQuery(strSql)
 
         time.sleep(5)
+
+    else:
+        print("城市名为 %s %s 的地址已爬取完成，忽略！" % (cityInfo[1], cityInfo[0]))
 
 
 if __name__ == "__main__":
@@ -179,5 +161,3 @@ if __name__ == "__main__":
     for cityInfo in m_tr:
         rtnInfo = GetAreaInfo(cityInfo)
         # print(cityInfo)
-
-
