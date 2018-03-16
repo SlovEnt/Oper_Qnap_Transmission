@@ -95,74 +95,76 @@ def GetAreaInfo(cityInfo):
         # print(areaCode)
 
         source = soup.find_all(class_='txt_con')
-        # print(source[1])
-        sourceSub = source[1].find_all("a", href=True)
 
-        for x in sourceSub:
+        if len(source) > 1:
 
-            if x.get_text(strip=True):
+            sourceSub = source[1].find_all("a", href=True)
 
-                # print(x['href'])
-                provinceInfoDict["postCode"] = x.text
-                provinceInfoDict["provinceName"] = provinceName
-                provinceInfoDict["cityName"] = cityInfo[1]
-                provinceInfoDict["areaCode"] = areaCode
+            for x in sourceSub:
 
-                strSql = "select count(*) from `v2PySql`.`province_info` where post_code = '%s'" % (provinceInfoDict["postCode"])
-                while True:
-                    try:
-                        rtnCnt = mysqlExe.ExecQuery(strSql)[0][0]
-                        break
-                    except Exception as e:
-                        print(e)
-                        time.sleep(1)
+                if x.get_text(strip=True):
 
-                if rtnCnt == 0:
-                    streetUrl = "%s%s" % ("http://tool.cncn.com", x['href'])
-                    req = request.Request(streetUrl, headers=head)
+                    # print(x['href'])
+                    provinceInfoDict["postCode"] = x.text
+                    provinceInfoDict["provinceName"] = provinceName
+                    provinceInfoDict["cityName"] = cityInfo[1]
+                    provinceInfoDict["areaCode"] = areaCode
 
+                    strSql = "select count(*) from `v2PySql`.`province_info` where post_code = '%s'" % (provinceInfoDict["postCode"])
                     while True:
                         try:
-                            response = request.urlopen(req)
+                            rtnCnt = mysqlExe.ExecQuery(strSql)[0][0]
                             break
                         except Exception as e:
                             print(e)
-                            time.sleep(10)
+                            time.sleep(1)
 
-                    streetUrlHtml = response.read().decode('gbk')
-                    time.sleep(2)
+                    if rtnCnt == 0:
+                        streetUrl = "%s%s" % ("http://tool.cncn.com", x['href'])
+                        req = request.Request(streetUrl, headers=head)
 
-                    streetUrlHtmlPage = BeautifulSoup(streetUrlHtml, "html.parser")
-                    # print(streetUrlHtmlPage)
-                    source = streetUrlHtmlPage.find_all(class_='txt_area')[0].find_all("li")
-
-                    for d in source:
-                        provinceInfoDict["address"] = d.text
-
-                        # print(provinceInfoDict)
-
-                        strSql = '''INSERT INTO `v2PySql`.`province_info` (`province`, `city`, `area_name`, `area_code`, `post_code`, `address`) VALUES ('%s', '%s', '%s', '%s', '%s', '%s');''' % (
-                            provinceName,
-                            cityInfo[1],
-                            '',
-                            areaCode,
-                            provinceInfoDict["postCode"],
-                            provinceInfoDict["address"]
-                        )
                         while True:
                             try:
-                                print(strSql)
-                                mysqlExe.ExecNonQuery(strSql)
+                                response = request.urlopen(req)
                                 break
                             except Exception as e:
                                 print(e)
-                                time.sleep(1)
+                                time.sleep(10)
 
-                else :
+                        streetUrlHtml = response.read().decode('gbk')
+                        time.sleep(2)
 
-                    print("%s 已经存在 %s 条记录，跳过！" % (provinceInfoDict["postCode"], rtnCnt) )
+                        streetUrlHtmlPage = BeautifulSoup(streetUrlHtml, "html.parser")
+                        # print(streetUrlHtmlPage)
+                        source = streetUrlHtmlPage.find_all(class_='txt_area')[0].find_all("li")
 
-                provinceInfoDict = {}
+                        for d in source:
+                            provinceInfoDict["address"] = d.text
+
+                            # print(provinceInfoDict)
+
+                            strSql = '''INSERT INTO `v2PySql`.`province_info` (`province`, `city`, `area_name`, `area_code`, `post_code`, `address`) VALUES ('%s', '%s', '%s', '%s', '%s', '%s');''' % (
+                                provinceName,
+                                cityInfo[1],
+                                '',
+                                areaCode,
+                                provinceInfoDict["postCode"],
+                                provinceInfoDict["address"]
+                            )
+                            while True:
+                                try:
+                                    print(strSql)
+                                    mysqlExe.ExecNonQuery(strSql)
+                                    break
+                                except Exception as e:
+                                    print(e)
+                                    time.sleep(1)
+
+                    else :
+
+                        print("%s 已经存在 %s 条记录，跳过！" % (provinceInfoDict["postCode"], rtnCnt) )
+
+                    provinceInfoDict = {}
 
         strSql = "update `v2PySql`.`provnce_flag` set flag = '1' where `url`= '%s';" % (subUrl)
         while True:
