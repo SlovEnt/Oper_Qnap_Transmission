@@ -58,7 +58,13 @@ def GetAreaInfo(cityInfo):
     if rtnCnt != "1" :
 
         req = request.Request("%s%s" % (rootUrl, cityInfo[0]), headers=head)
-        response = request.urlopen(req)
+        while True:
+            try:
+                response = request.urlopen(req)
+                break
+            except Exception as e:
+                print(e)
+                time.sleep(10)
         html = response.read().decode('gbk')
         soup = BeautifulSoup(html, "html.parser")
 
@@ -93,10 +99,18 @@ def GetAreaInfo(cityInfo):
                 if rtnCnt == 0:
                     streetUrl = "%s%s" % ("http://tool.cncn.com", x['href'])
                     req = request.Request(streetUrl, headers=head)
-                    response = request.urlopen(req)
-                    time.sleep(1)
+
+                    while True:
+                        try:
+                            response = request.urlopen(req)
+                            break
+                        except Exception as e:
+                            print(e)
+                            time.sleep(10)
+
                     streetUrlHtml = response.read().decode('gbk')
-                    time.sleep(1)
+                    time.sleep(2)
+
                     streetUrlHtmlPage = BeautifulSoup(streetUrlHtml, "html.parser")
                     # print(streetUrlHtmlPage)
                     source = streetUrlHtmlPage.find_all(class_='txt_area')[0].find_all("li")
