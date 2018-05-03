@@ -289,8 +289,8 @@ if __name__ == "__main__":
 
             dbNewMagnetList = __Get_DB_New_Magnet(addTaskCnt)
             todayYYYYMMDD = datetime.datetime.now().strftime("%Y%m%d")
-            # downloadDir = "/share/CACHEDEV1_DATA/Datas/Bad_Item/transmission/downloads/%s" % todayYYYYMMDD
-            downloadDir = "/share/CACHEDEV1_DATA/Datas/Bad_Item/transmission/downloads"
+            downloadDir = "/share/CACHEDEV1_DATA/Datas/Bad_Item/transmission/downloads/%s" % todayYYYYMMDD
+            # downloadDir = "/share/CACHEDEV1_DATA/Datas/Bad_Item/transmission/downloads"
 
             for dbNewMagnet in dbNewMagnetList:
 

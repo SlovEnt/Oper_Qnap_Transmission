@@ -108,8 +108,8 @@ class Get_1024_MagnetLink_Main():
             return False
         else :
 
-            for data in rawDatasOne :
-                print("匹配 {0}".format(msg), data)
+            # for data in rawDatasOne :
+            #     print("匹配 {0}".format(msg), data)
 
             return rawDatasOne
 
@@ -205,6 +205,43 @@ class Get_1024_MagnetLink_Main():
     #     #
     #     return movieInfoArr
 
+    def Access_Url_RtnContent(self, accessType, fileName, url, downUrl = "", data={}):
+        x = 0
+        while x <= 10:
+            try:
+                x += 1
+                if accessType == "get":
+                    response = requests.get(url=url, params=self.headers)
+                else :
+                    self.headers = {'Referer': "{0}".format(downUrl)}
+                    response = requests.post(url, headers=self.headers, data=data, timeout=30)
+                contentText = response.content
+
+
+                if fileName != "" :
+                    with open(fileName, "wb") as f:
+                        for chunk in response.iter_content(chunk_size=512):
+                            if chunk:
+                                 f.write(chunk)
+
+                break
+
+            except Exception as e:
+
+                print(e)
+
+                if "[Errno 2] No such file or directory" in str(e):
+                    break
+
+                # return False
+
+        if x > 10 :
+            return  False
+        else:
+            return  contentText
+
+    def Get_Post_PageContent(self, tableName, postNode, downSubFloder):
+        pass
 
 
     def Get_Post_Content_List(self, tableName, postNode, downSubFloder):
@@ -212,9 +249,13 @@ class Get_1024_MagnetLink_Main():
         downFlag = 0
         postUrl = postNode["href"]
         print("获得帖子下载链接", postUrl)
+
+        pageFileName = r"{0}\0000.html".format(downSubFloder)
+
+        # html = self.Access_Url_RtnContent("get", pageFileName, postUrl)
+
         html = requests.get(url=postUrl, params=self.headers)
 
-        pageFileName = "{0}\page.html".format(downSubFloder)
 
         with open(pageFileName, "wb") as code:
             code.write(html.content)
@@ -224,87 +265,324 @@ class Get_1024_MagnetLink_Main():
 
         nodes = soup.find_all(name="div", attrs={"class":"tpc_content",'id':"read_tpc"})
 
-        nodeContent = str(nodes[0])
+        if len(nodes) > 0:
 
-        print("帖子内容爬取", nodeContent)
-        print("下载目录设置", downSubFloder)
+            nodeContent = str(nodes[0])
 
-        n = 0
+            print("帖子内容爬取", nodeContent)
 
-        if "www1.downsx" in nodeContent:
-            nodes = re.split(""""_blank">http://www1.downsx..+?</a>""", nodeContent)
+            print("下载目录设置", downSubFloder)
 
-            del nodes[-1]
-            for node in nodes:
-                # node = node.replace("<div class=\"tpc_content\" id=\"read_tpc\">", "")
-                # node = node.replace("<br/><br/>", "")
-                # node = node.replace("：", "")
-                # node = node.replace(":", "")
-                # node = node.replace("-", "")
-                # node = node.replace("=", "")
+            n = 0
 
-                print("单一影片信息", node)
+            if "點擊進入下載" in nodeContent and "pwpan.com" in nodeContent:
 
-                n += 1
-                filePrefix = '%03d' % n
+                print("规则1")
 
-                print("本次文件序号为", filePrefix)
+                nodeContent = "".join(nodeContent.split())
 
-                # 从节点中获取所有图片资源链接
-                imgPre = re.compile(r"""src="(.+?)"/>""")
-                imgLinks = self.Is_Re_Correctly(node, imgPre, "图片链接")
-                for imgsLink in imgLinks :
-                    print(imgsLink)
-                    filename = os.path.basename(imgsLink)
-                    testname = "{0}\{1}_{2}".format(downSubFloder, filePrefix, filename)
-                    response = requests.get(url=imgsLink, params=self.headers)
-                    with open(testname, "wb") as code:
-                        code.write(response.content)
+                divNodesList = re.split("""============""", nodeContent)
+                # divNodes = nodeContent.split(""""uptorrentfilespacedownhostabc""")
 
-                # 从节点中获取所有种子资源链接
-                torrentPre = re.compile(r"""<a href="(.+?)" target=""")
-                torrentLinks = self.Is_Re_Correctly(node, torrentPre, "种子链接")
-                for torrentLink in torrentLinks:
+                for divNode in divNodesList:
 
-                    if "www1.downsx" in torrentLink :
+                    print("单一影片信息", divNode)
 
 
+                    n += 1
+                    filePrefix = '%03d' % n
 
-                        while True :
-                            try :
-                                self.headers = {'Referer': "{0}".format(torrentLink)}
-                                response = requests.post(url=torrentLink, params=self.headers, timeout=30)
+                    print("本次文件序号为", filePrefix)
 
-                                text = response.content.decode('utf-8', 'ignore')
+                    # 从节点中获取所有图片资源链接
+                    imgPre = re.compile(r"""src="(.+?)"/>""")
+                    imgLinks = self.Is_Re_Correctly(divNode, imgPre, "图片链接")
+                    if imgLinks != False :
+                        for imgsLink in imgLinks :
+                            print("开始下载图片", imgsLink)
+                            filename = os.path.basename(imgsLink)
+                            testname = "{0}\{1}_{2}".format(downSubFloder, filePrefix, filename)
+                            while True :
+                                try :
 
-                                torrentDownPre = re.compile(r"""href="(.+?)">下載檔案</a>""")
-                                torrentDownExten = self.Is_Re_Correctly(text, torrentDownPre)
+                                    response = requests.get(url=imgsLink, params=self.headers)
+                                    with open(testname, "wb") as code:
+                                        code.write(response.content)
+                                    break
 
-                                torrentArr = torrentLink.split("/torrent")
-                                newDownLink = "{0}{1}".format(torrentArr[0], torrentDownExten[0])
+                                except Exception as e:
+                                    print(e)
+                                    if "No such file or directory" in str(e):
+                                        break
 
-                                print("剥离下载链接：", torrentLink)
-                                print("实际下载链接：", newDownLink)
+                        # 从节点中获取所有种子资源链接
+                        torrentPre = re.compile(r"""<ahref="(.+?)"target="_blank">""")
+                        torrentLinks = self.Is_Re_Correctly(divNode, torrentPre, "种子链接")
+                        for torrentLink in torrentLinks:
 
-                                response = requests.post(newDownLink, headers=self.headers, timeout=30)
-                                testname = "{0}\{1}.torrent".format(downSubFloder, filePrefix)
-                                with open(testname, "wb") as code:
-                                    code.write(response.content)
-                                downFlag += 1
-                                break
-                            except Exception as e :
-                                print(e)
-                    else:
-                        pass
+                            if "www1.downsx" in torrentLink :
 
-                # end for
+                                while True :
 
-            # end for
+                                    try :
+                                        self.headers = {'Referer': "{0}".format(torrentLink)}
+                                        response = requests.post(url=torrentLink, params=self.headers, timeout=30)
 
-        else :
-            pass
+                                        text = response.content.decode('utf-8', 'ignore')
 
-        print()
+                                        torrentDownPre = re.compile(r"""href="(.+?)">下載檔案</a>""")
+                                        torrentDownExten = self.Is_Re_Correctly(text, torrentDownPre)
+
+                                        torrentArr = torrentLink.split("/torrent")
+                                        newDownLink = "{0}{1}".format(torrentArr[0], torrentDownExten[0])
+
+                                        print("剥离下载链接：", torrentLink)
+                                        print("实际下载链接：", newDownLink)
+
+                                        response = requests.post(newDownLink, headers=self.headers, timeout=30)
+                                        testname = "{0}\{1}.torrent".format(downSubFloder, filePrefix)
+                                        with open(testname, "wb") as code:
+                                            code.write(response.content)
+                                        downFlag += 1
+                                        break
+
+                                    except Exception as e :
+                                        print(e)
+
+                            elif "qqxbt." in torrentLink:
+
+                                while True:
+
+                                    try:
+                                        self.headers = {'Referer': "{0}".format(torrentLink)}
+                                        response = requests.post(url=torrentLink, params=self.headers, timeout=30)
+
+                                        text = response.content.decode('utf-8', 'ignore')
+
+                                        # torrentDownPre = re.compile(r"""location.href='(.+?)';this.disabled = true;""")
+                                        # torrentDownExten = self.Is_Re_Correctly(text, torrentDownPre)
+
+                                        newDownLink = torrentLink.replace("Public", "Download")
+                                        # newDownLink = "{0}{1}".format(torrentArr[0], torrentDownExten[0])
+
+                                        print("剥离下载链接：", torrentLink)
+                                        print("实际下载链接：", newDownLink)
+
+                                        response = requests.post(newDownLink, headers=self.headers, timeout=30)
+                                        testname = "{0}\{1}.torrent".format(downSubFloder, filePrefix)
+                                        with open(testname, "wb") as code:
+                                            code.write(response.content)
+                                        downFlag += 1
+                                        break
+
+                                    except Exception as e:
+
+                                        print(e)
+                                        if "No such file or directory" in str(e):
+
+                                            break
+
+
+
+            elif "www1.downsx" in nodeContent or "qqxbt." in nodeContent:
+
+                nodes = re.split(""""_blank">http://www1.downsx..+?</a>""", nodeContent)
+
+                del nodes[-1]
+                for node in nodes:
+                    # node = node.replace("<div class=\"tpc_content\" id=\"read_tpc\">", "")
+                    # node = node.replace("<br/><br/>", "")
+                    # node = node.replace("：", "")
+                    # node = node.replace(":", "")
+                    # node = node.replace("-", "")
+                    # node = node.replace("=", "")
+
+                    print("单一影片信息", node)
+
+                    n += 1
+                    filePrefix = '%03d' % n
+
+                    print("本次文件序号为", filePrefix)
+
+                    # 从节点中获取所有图片资源链接
+                    imgPre = re.compile(r"""src="(.+?)"/>""")
+                    imgLinks = self.Is_Re_Correctly(node, imgPre, "图片链接")
+                    if imgLinks != False :
+                        for imgsLink in imgLinks :
+                            print("开始下载图片", imgsLink)
+                            filename = os.path.basename(imgsLink)
+                            testname = "{0}\{1}_{2}".format(downSubFloder, filePrefix, filename)
+                            while True :
+                                try :
+
+                                    response = requests.get(url=imgsLink, params=self.headers)
+                                    with open(testname, "wb") as code:
+                                        code.write(response.content)
+                                    break
+
+                                except Exception as e:
+                                    print(e)
+                                    if "No such file or directory" in str(e):
+                                        break
+
+                        # 从节点中获取所有种子资源链接
+                        torrentPre = re.compile(r"""<a href="(.+?)" target=""")
+                        torrentLinks = self.Is_Re_Correctly(node, torrentPre, "种子链接")
+                        for torrentLink in torrentLinks:
+
+                            if "www1.downsx" in torrentLink :
+
+                                while True :
+
+                                    try :
+                                        self.headers = {'Referer': "{0}".format(torrentLink)}
+                                        response = requests.post(url=torrentLink, params=self.headers, timeout=30)
+
+                                        text = response.content.decode('utf-8', 'ignore')
+
+                                        torrentDownPre = re.compile(r"""href="(.+?)">下載檔案</a>""")
+                                        torrentDownExten = self.Is_Re_Correctly(text, torrentDownPre)
+
+                                        torrentArr = torrentLink.split("/torrent")
+                                        newDownLink = "{0}{1}".format(torrentArr[0], torrentDownExten[0])
+
+                                        print("剥离下载链接：", torrentLink)
+                                        print("实际下载链接：", newDownLink)
+
+                                        response = requests.post(newDownLink, headers=self.headers, timeout=30)
+                                        testname = "{0}\{1}.torrent".format(downSubFloder, filePrefix)
+                                        with open(testname, "wb") as code:
+                                            code.write(response.content)
+                                        downFlag += 1
+                                        break
+
+                                    except Exception as e :
+                                        print(e)
+
+                            elif "qqxbt." in torrentLink:
+
+                                while True:
+
+                                    try:
+                                        self.headers = {'Referer': "{0}".format(torrentLink)}
+                                        response = requests.post(url=torrentLink, params=self.headers, timeout=30)
+
+                                        text = response.content.decode('utf-8', 'ignore')
+
+                                        # torrentDownPre = re.compile(r"""location.href='(.+?)';this.disabled = true;""")
+                                        # torrentDownExten = self.Is_Re_Correctly(text, torrentDownPre)
+
+                                        newDownLink = torrentLink.replace("Public", "Download")
+                                        # newDownLink = "{0}{1}".format(torrentArr[0], torrentDownExten[0])
+
+                                        print("剥离下载链接：", torrentLink)
+                                        print("实际下载链接：", newDownLink)
+
+                                        response = requests.post(newDownLink, headers=self.headers, timeout=30)
+                                        testname = "{0}\{1}.torrent".format(downSubFloder, filePrefix)
+                                        with open(testname, "wb") as code:
+                                            code.write(response.content)
+                                        downFlag += 1
+                                        break
+
+                                    except Exception as e:
+
+                                        print(e)
+                                        if "No such file or directory" in str(e):
+
+                                            break
+
+
+
+                            else:
+                                pass
+
+                        # end for
+
+                    # end for
+
+            elif "uptorrentfilespacedownhostabc" in nodeContent :
+
+                nodes = re.split(""""_blank">http://www3.uptorrentfilespacedownhostabc.+?</a>""", nodeContent)
+                del nodes[-1]
+                for node in nodes:
+                    print("单一影片信息", node)
+                    n += 1
+                    filePrefix = '%03d' % n
+
+                    print("本次文件序号为", filePrefix)
+
+                    # 从节点中获取所有图片资源链接
+                    imgPre = re.compile(r"""src="(.+?)"/>""")
+                    imgLinks = self.Is_Re_Correctly(node, imgPre, "图片链接")
+                    if imgLinks != False:
+                        for imgsLink in imgLinks:
+                            print("开始下载图片", imgsLink)
+                            filename = os.path.basename(imgsLink)
+                            testname = "{0}\{1}_{2}".format(downSubFloder, filePrefix, filename)
+                            while True:
+                                try:
+
+                                    response = requests.get(url=imgsLink, params=self.headers)
+                                    with open(testname, "wb") as code:
+                                        code.write(response.content)
+                                    break
+
+                                except Exception as e:
+
+                                    print(e)
+                                    if "No such file or directory" in str(e):
+                                        break
+
+                        # 从节点中获取所有种子资源链接
+                        torrentPre = re.compile(r"""<a href="(.+?)" target=""")
+                        torrentLinks = self.Is_Re_Correctly(node, torrentPre, "种子链接")
+                        for torrentLink in torrentLinks:
+
+                            if "uptorrentfilespacedownhostabc" in torrentLink:
+
+                                # print(torrentLink)
+
+                                while True:
+
+                                    try:
+                                        self.headers = {'Referer': "{0}".format(torrentLink)}
+                                        response = requests.get(url=torrentLink, params=self.headers, timeout=30)
+
+                                        html = response.content.decode('utf-8', 'ignore')
+                                        soup = BeautifulSoup(html, 'html.parser')
+                                        inputDicts = soup.find_all(name="input", attrs={"type": "hidden"})
+                                        data = {}
+                                        for inputDict in inputDicts :
+                                            data[inputDict["id"]] = inputDict["value"]
+
+                                        torrentArr = torrentLink.split("/file.php")
+                                        newDownLink = "{0}{1}".format(torrentArr[0], "/down.php")
+
+                                        # newDownLink = "http://www3.uptorrentfilespacedownhostabc.pw/updowm/down.php"
+
+                                        print("剥离下载链接：", torrentLink)
+                                        print("实际下载链接：", newDownLink, data)
+
+                                        response = requests.post(newDownLink, data = data, headers=self.headers, timeout=30)
+                                        testname = "{0}\{1}.torrent".format(downSubFloder, filePrefix)
+                                        with open(testname, "wb") as code:
+                                            code.write(response.content)
+                                        downFlag += 1
+                                        break
+
+                                    except Exception as e:
+                                        print(e)
+
+                            else:
+                                pass
+
+                                # end for
+
+                                # end for
+
+
+
 
         return downFlag
 

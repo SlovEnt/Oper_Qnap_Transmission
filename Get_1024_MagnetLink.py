@@ -25,7 +25,7 @@ mysqlConn = torndb.Connection(
 
 ROOT_URL = "http://1024.917rbb.info/pw/thread.php?fid=3"
 
-DOWN_FLODERS = r"\\192.168.1.201\Datas\Bad_Item\Torrent_By_1024"
+DOWN_FLODERS = r"\\192.168.1.201\Datas\Bad_Item\Torrent_By_1024\00.Collection"
 
 POST_ROOT_URL = "http://w2.aqu1024.net/pw"
 
@@ -96,9 +96,9 @@ if __name__ == "__main__":
 
                 else:
 
-                    print("帖子标题为", postNode["title"])
+                    print("帖子标题为", postNode["id"], postNode["title"])
 
-                    downSubFloder = "{0}\{1}".format(DOWN_FLODERS, postNode["title"])
+                    downSubFloder = "{0}\{2}_{1}".format(DOWN_FLODERS, postNode["title"], postNode["id"])
                     isExists = os.path.exists(downSubFloder)
                     if not isExists:
                         # 如果不存在则创建目录
@@ -126,3 +126,6 @@ if __name__ == "__main__":
 
                         gmm.Update_Init_TaskLog(tableName, whereDict, postNode)
 
+                        print()
+                        print()
+                        print()
