@@ -243,7 +243,6 @@ class Get_1024_MagnetLink_Main():
     def Get_Post_PageContent(self, tableName, postNode, downSubFloder):
         pass
 
-
     def Get_Post_Content_List(self, tableName, postNode, downSubFloder):
 
         downFlag = 0

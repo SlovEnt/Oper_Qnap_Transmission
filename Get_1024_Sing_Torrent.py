@@ -29,8 +29,10 @@ mysqlConn = torndb.Connection(
 
 
 ROOT_URL = "http://w2.aqu1024.net/pw/thread.php?fid=5"
+ROOT_URL = "http://w2.aqu1024.net/pw/thread.php?fid=22"
 
 DOWN_FLODERS = r"\\192.168.1.201\Datas\Bad_Item\Torrent_By_1024\00.YZWM"
+DOWN_FLODERS = r"\\192.168.1.201\Datas\Bad_Item\Torrent_By_1024\00.RBQB"
 
 POST_ROOT_URL = "http://w2.aqu1024.net/pw"
 
@@ -96,6 +98,7 @@ def Down_1024SingTorrent(node):
                 for imgUrl in imgLinks:
                     print("获取图片链接", imgUrl)
                     fileName = os.path.basename(imgUrl)
+                    fileName = fileName.replace("*","")
                     fileName = "{0}\{1}".format(downSubFloder, fileName)
                     gmm.Access_Url_RtnContent("get", fileName, imgUrl, data={})
 
@@ -167,7 +170,7 @@ if __name__ == "__main__":
             soup = BeautifulSoup(html, 'html.parser')
             divNodes = soup.find_all(name="td", attrs={"style": "text-align:left;padding-left:8px"})
 
-            p = Pool(1)
+            p = Pool(5)
             for node in divNodes:
                 p.apply_async(Down_1024SingTorrent, args=(node,))
             p.close()
