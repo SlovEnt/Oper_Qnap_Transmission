@@ -28,6 +28,7 @@ class Get_1024_MagnetLink_Main():
 
         rtnDatas = OrderedDict()
 
+        # print(strSql)
         rtnDBDatas = self.mysqlConn.query(strSql)
 
         rtnDatas["CNT"] = len(rtnDBDatas)
@@ -73,7 +74,7 @@ class Get_1024_MagnetLink_Main():
 
         ''' 最终组装UPDATE全语句 '''
         strSql = "UPDATE {0} SET {1} WHERE 0=0{2}".format(tableName, strSetSql, strWhereSql)
-        print(strSql)
+        # print(strSql)
 
         try:
             self.mysqlConn.execute(strSql)
@@ -93,7 +94,7 @@ class Get_1024_MagnetLink_Main():
                 fieldList = "{0}, {1}".format(fieldList, key)
                 valueList = "{0}, '{1}'".format(valueList, value)
         strSql = "INSERT INTO {0} ({1}) VALUES ({2})".format(tableName, fieldList, valueList)
-        print(strSql)
+        # print(strSql)
         try:
             self.mysqlConn.execute(strSql)
             return True
@@ -230,8 +231,8 @@ class Get_1024_MagnetLink_Main():
 
                 print(e)
 
-                if "[Errno 2] No such file or directory" in str(e):
-                    break
+                # if "[Errno 2] No such file or directory" in str(e):
+                #     break
 
                 # return False
 
@@ -644,7 +645,8 @@ class Get_1024_MagnetLink_Main():
         import time
         # time.sleep(60)
 
-
+    def Get_BBS169_Forum_Contant(self, forumInfo):
+        pass
 
 
 
