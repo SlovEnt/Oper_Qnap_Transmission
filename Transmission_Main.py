@@ -170,6 +170,9 @@ if __name__ == "__main__":
         hostDnsName = paramInfo["HOST_DNS_NAME"]
         mgntPort = paramInfo["HOST_PORT"]
         authStr = paramInfo["AUTH_STR"]
+
+        print(hostDnsName,mgntPort )
+
         tmSession = __Get_Session(hostDnsName,mgntPort,authStr)
 
         print()
@@ -296,9 +299,14 @@ if __name__ == "__main__":
 
                 dbNewMagnet = dbNewMagnet.decode('utf-8') # blob字段转str
 
+                # print(dbNewMagnet)
+
+                # print(dbNewMagnet, hostDnsName, mgntPort, authStr, downloadDir,tmSession)
                 rtnDatas = __Add_Torrents_2_Transmission(dbNewMagnet, hostDnsName, mgntPort, authStr, downloadDir,tmSession)
 
                 if rtnDatas["result"] == "success":
+
+                    # print(rtnDatas)
 
                     strSql = "UPDATE get_tpb_all_magnet SET down_flag='1' WHERE hash_string = '%s';" % rtnDatas["arguments"]["torrent-added"]["hashString"]
                     print(debug(), "修改已 POST 的种子信息：%s" % strSql)
@@ -314,5 +322,6 @@ if __name__ == "__main__":
         # _ssh_sync_files()
 
     except Exception as e:
+        print(rtnDatas)
         traceback.print_exc()
         print(e)

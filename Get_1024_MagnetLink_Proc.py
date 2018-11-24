@@ -7,6 +7,7 @@ import requests
 from collections import OrderedDict
 import re
 import os
+import traceback
 
 class Get_1024_MagnetLink_Main():
 
@@ -216,6 +217,7 @@ class Get_1024_MagnetLink_Main():
                 else :
                     self.headers = {'Referer': "{0}".format(downUrl)}
                     response = requests.post(url, headers=self.headers, data=data, timeout=30)
+
                 contentText = response.content
 
 
@@ -228,6 +230,8 @@ class Get_1024_MagnetLink_Main():
                 break
 
             except Exception as e:
+
+                traceback.print_exc()
 
                 print(e)
 
@@ -263,13 +267,15 @@ class Get_1024_MagnetLink_Main():
         html = html.content.decode('utf-8', 'ignore')
         soup = BeautifulSoup(html, 'html.parser')
 
-        nodes = soup.find_all(name="div", attrs={"class":"tpc_content",'id':"read_tpc"})
+        nodes = soup.find_all(name="div", attrs={"class":"f14",'id':"read_tpc"})
+
+        # print(nodes)
 
         if len(nodes) > 0:
 
             nodeContent = str(nodes[0])
 
-            print("帖子内容爬取", nodeContent)
+            # print("帖子内容爬取", nodeContent)
 
             print("下载目录设置", downSubFloder)
 
@@ -320,7 +326,7 @@ class Get_1024_MagnetLink_Main():
                         torrentLinks = self.Is_Re_Correctly(divNode, torrentPre, "种子链接")
                         for torrentLink in torrentLinks:
 
-                            if "www1.downsx" in torrentLink :
+                            if "www1.downsx" in torrentLink or "adns2.vodxxtv" in torrentLink :
 
                                 while True :
 
@@ -430,7 +436,7 @@ class Get_1024_MagnetLink_Main():
                         torrentLinks = self.Is_Re_Correctly(node, torrentPre, "种子链接")
                         for torrentLink in torrentLinks:
 
-                            if "www1.downsx" in torrentLink :
+                            if "www1.downsx" in torrentLink or "adns2.vodxxtv" in torrentLink :
 
                                 while True :
 

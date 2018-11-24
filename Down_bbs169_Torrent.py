@@ -25,13 +25,13 @@ mysqlConn = torndb.Connection(
 )
 
 
-POST_ROOT_URL = "http://bbs169.com:8888"
-ROOT_URL = "http://bbs169.com:8888/forum.php?mod=forumdisplay&fid=45"
-ROOT_URL = "http://bbs169.com:8888/forum.php?mod=forumdisplay&fid=160"
+POST_ROOT_URL = "http://bbs99.club:8888"
+ROOT_URL = "http://bbs99.club:8888/forum.php?mod=forumdisplay&fid=45"
+ROOT_URL = "http://bbs99.club:8888/forum.php?mod=forumdisplay&fid=160"
 DOWN_FLODERS = r"\\192.168.1.201\Datas\Bad_Item\Torrent_By_1024"
 
 headers = { 'User-Agent' : "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36"}
-headers = { 'Referer' : "http://bbs169.com:8888/forum.php?mod=forumdisplay&fid=45"}
+headers = { 'Referer' : "http://bbs99.club:8888/forum.php?mod=forumdisplay&fid=45"}
 
 
 if __name__ == "__main__":
@@ -102,7 +102,9 @@ if __name__ == "__main__":
 
                 downSubFloder = forumInfo["title"].replace("\\", " ")
                 downSubFloder = downSubFloder.replace("/", " ")
+                downSubFloder = downSubFloder.replace(":", " ")
                 downSubFloder = downSubFloder.replace("  ", " ")
+                downSubFloder = downSubFloder.replace('"', "")
 
                 for x in range(0, len(downSubFloder)) :
                     # print(downSubFloder)
@@ -136,13 +138,14 @@ if __name__ == "__main__":
                 soup = BeautifulSoup(forumHtmlContant, 'html.parser')
 
                 forumContant = soup.find_all(name="div", attrs={"class": "t_fsz"})
-                forumContant = forumContant[0]
+
+                # forumContant = soup.find_all(name="td", attrs={"class": "t_f", "id": "postmessage_2314731"})
                 # print(forumContant)
+
+                forumContant = forumContant[0]
 
                 imgLinkFlag = 0
                 imgLists = forumContant.find_all(name="a", attrs={"href": re.compile("imageshack|imagetwist|imagexport")})
-
-
 
                 if len(imgLists) == 0:
                     imgLinkFlag = 1
@@ -151,6 +154,8 @@ if __name__ == "__main__":
                 if len(imgLists) == 0:
                     imgLinkFlag = 2
                     imgLists = forumContant.find_all(name="img", attrs={"file": re.compile("\.jpg|\.jpeg|\.png")})
+
+                # print(imgLists)
 
                 n = 0
                 for link in imgLists :
@@ -218,8 +223,4 @@ if __name__ == "__main__":
                 print()
 
                 # time.sleep(30)
-
-
-
-
 
