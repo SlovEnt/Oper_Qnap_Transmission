@@ -12,6 +12,7 @@ from collections import OrderedDict
 from ResPacks import torndb
 from ResPacks.UsedCommFuncs import Get_Param_Info
 from proc import get_html_all_content, Get_1024_MagnetLink_Main
+import traceback
 
 
 # 参数加载区
@@ -48,7 +49,7 @@ def main():
     gmm = Get_1024_MagnetLink_Main(mysqlConn, ROOT_URL, DOWN_FLODERS, POST_ROOT_URL)
 
     # 下载的最大帖子列表页数
-    postsMaxNum = 1
+    postsMaxNum = 3
 
     # 定义数组 用于存放帖子信息
     postInfos = []
@@ -110,6 +111,12 @@ def main():
         # n += 1
         # print(n, postNode)
 
+        # #****************************************
+        # # 当单一帖子出现问题 用以下方式过滤
+        # if postNode["id"] != "a_ajax_4116754":
+        #     continue
+        # #****************************************
+
         # 下载存放目录
         downSubFloder = "{0}\{1}".format(DOWN_FLODERS, postNode["folder_name"])
 
@@ -148,10 +155,6 @@ def main():
         with open(pageFileName, "w", encoding='utf-8') as f:
             f.write(subPostHtml)
 
-        # # 当单一帖子出现问题 用以下方式过滤
-        # if postNode["id"] != "a_ajax_4115475":
-        #     continue
-
         rtnMsg = gmm.down_torrent_and_images(subPostHtml, postNode, downSubFloder)
 
         whereDict = {}
@@ -182,5 +185,8 @@ def main():
 # print("10002 下载帖子地址为：{0}，存放子目录为：{1}。".format(postNode["href"], folderName))
 
 if __name__ == '__main__':
-
-    main()
+    try:
+        main()
+    except Exception as e:
+        print(e)
+        # traceback.print_exc()

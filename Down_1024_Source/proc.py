@@ -10,6 +10,7 @@ import os
 import traceback
 import random
 import time
+import json
 
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -187,7 +188,7 @@ class Get_1024_MagnetLink_Main():
                 if downCnt>3:
                     proxyFlag = "Y"
 
-                print("\n----------error------------\n{0}\n------end--------\n".format(html))
+                print("----------error----------\n{0}\n----------end----------\n".format(html))
                 getFlag = False
                 time.sleep(5)
         return html
@@ -229,6 +230,8 @@ class Get_1024_MagnetLink_Main():
                             if r.status_code == 200:
                                 getFlag == True
                                 break
+                            else:
+                                print(r.status_code)
                         except Exception as e:
                             print(10057, url, e)
                             strSql = "update proxy_list set weights = weights+1 where ip='{0}' and port='{1}' and type='{2}'".format(proxyInfo["ip"], proxyInfo["port"], proxyInfo["type"])
@@ -267,9 +270,14 @@ class Get_1024_MagnetLink_Main():
                 headers["Accept"] = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"
                 headers["Accept-Encoding"] = "gzip, deflate"
                 headers["Upgrade-Insecure-Requests"] = "1"
+
+                datas = {'depwhk': 'zwax',
+                         "isrqxu": "8",
+                         "ngpuru": "tysd3"}
+
                 downCnt += 1
                 if proxyFlag == "N":
-                    r = requests.post(url=url, headers=headers, timeout=30, verify=False)
+                    r = requests.post(url=url, headers=headers, verify=False, data=json.dumps(datas))
                     r.raise_for_status()
                     if r.status_code == 200:
                         getFlag = True
@@ -278,13 +286,14 @@ class Get_1024_MagnetLink_Main():
                         print("10998 获取代理", proxyInfo)
                         proxies = {proxyInfo["type"]: '{0}://{1}:{2}'.format(proxyInfo["type"], proxyInfo["ip"], proxyInfo["port"])}
                         try:
-                            r = requests.post(url=url, headers=headers, timeout=30, verify=False, proxies=proxies)
+                            r = requests.post(url=url, headers=headers, verify=False, proxies=proxies, data=json.dumps(datas))
                             proxyList.pop(0)
                             r.raise_for_status()
                             if r.status_code == 200:
                                 getFlag == True
                                 break
                         except Exception as e:
+
                             print(10057, url, e)
                             strSql = "update proxy_list set weights = weights+1 where ip='{0}' and port='{1}' and type='{2}'".format(proxyInfo["ip"], proxyInfo["port"], proxyInfo["type"])
                             self.mysqlConn.execute(strSql)
@@ -317,6 +326,8 @@ class Get_1024_MagnetLink_Main():
             nodes = soup.find_all(name="div", attrs={"class":"f14",'id':"read_tpc"})
             nodeContent = str(nodes[0])
 
+            # print("--------\n{0}\n------------".format(nodeContent))
+
             if "www1.downsx" in nodeContent:
                 divNodesList = re.split(""""_blank">http://www1.downsx..+?</a>""", nodeContent)
                 del divNodesList[-1]
@@ -334,6 +345,7 @@ class Get_1024_MagnetLink_Main():
             elif "============" in nodeContent:
                 divNodesList = re.split("""============""", nodeContent)
 
+            divNodeCnt = len(divNodesList)
             n = 0 # 单一帖子资源组编号 照片+种子资源为一组
             for divNode in divNodesList:
 
@@ -342,7 +354,7 @@ class Get_1024_MagnetLink_Main():
 
                 n += 1
                 filePrefix = '%03d' % n
-
+                print("------------------ {0} - {1}/{2} ------------------".format(postNode["id"], filePrefix, '%03d' % divNodeCnt))
                 # divNode = divNode.replace("=", "")
                 divNode = divNode.replace('<div class"f14" id"read_tpc">', "")
                 # divNode = divNode.replace("<br/><br/>", "<br/>")
@@ -373,15 +385,28 @@ class Get_1024_MagnetLink_Main():
                     if "kccdk.com" in torrentLink:
                         continue
 
+                    if "motelppp" in torrentLink and "downsx" in divNode:
+                        '''可能一个节点会有两种BT连接，只取downsx网站的种子'''
+                        continue
+
+                    if "movieppp" in torrentLink and "downsx" in divNode:
+                        '''可能一个节点会有两种BT连接，只取downsx网站的种子'''
+                        continue
+
                     print("19365 {0} 种子下载链接：{1}".format(postNode["id"], torrentLink))
 
-                    if "downsx" in torrentLink or "vodxxtv" in torrentLink:
+                    if "downsx" in torrentLink or "vodxxtv" in torrentLink or "hgcdown" in torrentLink:
                         torrent_r = self.down_torrent(torrentLink)
                         text = torrent_r.content.decode('utf-8', 'ignore')
                         torrentDownPre = re.compile(r"""href="(.+?)">下載檔案</a>""")
+
                         torrentDownExten = self.Is_Re_Correctly(text, torrentDownPre)
+                        print(torrentDownExten)
+                        if torrentDownExten is False:
+                            raise "10097 torrentDownExten 未能得到想要的结果！"
 
                         torrentArr = torrentLink.split("/torrent")
+
                         newDownLink = "{0}{1}".format(torrentArr[0], torrentDownExten[0])
                         print("19366 {0} 种子真实链接：{1}".format(postNode["id"], newDownLink))
 
@@ -393,7 +418,9 @@ class Get_1024_MagnetLink_Main():
             downFlag = True
 
         except Exception as e:
-            print(10067, e)
+            # print("10899 {0} 单一影片原始节点信息 {1}".format(postNode["id"], divNode))
+            traceback.print_exc()
+            print(10067, e )
             return False
 
         return downFlag
@@ -487,7 +514,7 @@ def get_html_all_content(url, pageFlag, encode):
 
 def get_proxy_list(mysqlConn):
 
-    strSql = "SELECT ip, port, type FROM proxy_list WHERE 0=0 and is_ok='Y' order by weights"
+    strSql = "SELECT ip, port, type FROM proxy_list WHERE 0=0 and is_ok='Y' order by weights, ip"
 
     rtnDBDatas = mysqlConn.query(strSql)
 
