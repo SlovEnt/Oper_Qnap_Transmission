@@ -11,6 +11,7 @@ import traceback
 import random
 import time
 import json
+import random,string
 
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -271,33 +272,48 @@ class Get_1024_MagnetLink_Main():
                 headers["Accept-Encoding"] = "gzip, deflate"
                 headers["Upgrade-Insecure-Requests"] = "1"
 
-                datas = {'depwhk': 'zwax',
-                         "isrqxu": "8",
-                         "ngpuru": "tysd3"}
+
+                strLetterNum=string.ascii_letters+string.digits
+
+
+                # datas = {'depwhk': 'zwax',
+                #          "isrqxu": "8",
+                #          "agfshe": "2z54g3",
+                #          "yqjexm": "ccxbd3",
+                #          "ngpuru": "tysd3",
+                #             "".join(random.sample(strLetterNum, 6)) :"".join(random.sample(strLetterNum, 6)),
+                #             "".join(random.sample(strLetterNum, 6)) :"".join(random.sample(strLetterNum, 6)),
+                #             "".join(random.sample(strLetterNum, 6)) :"".join(random.sample(strLetterNum, 6)),
+                #          }
+                datas = {
+                            "".join(random.sample(strLetterNum, 6)) :"".join(random.sample(strLetterNum, 1)),
+                            "".join(random.sample(strLetterNum, 6)) :"".join(random.sample(strLetterNum, 2)),
+                            "".join(random.sample(strLetterNum, 6)) :"".join(random.sample(strLetterNum, 4)),
+                            "".join(random.sample(strLetterNum, 6)) :"".join(random.sample(strLetterNum, 4)),
+                            "".join(random.sample(strLetterNum, 6)) :"".join(random.sample(strLetterNum, 3)),
+                         }
 
                 downCnt += 1
                 if proxyFlag == "N":
-                    r = requests.post(url=url, headers=headers, verify=False, data=json.dumps(datas))
+                    r = requests.post(url=url, headers=headers, timeout=30, verify=False, data=json.dumps(datas))
                     r.raise_for_status()
-                    if r.status_code == 200:
+                    if str(r.status_code) == "200":
                         getFlag = True
                 else:
                     for proxyInfo in proxyList:
                         print("10998 获取代理", proxyInfo)
                         proxies = {proxyInfo["type"]: '{0}://{1}:{2}'.format(proxyInfo["type"], proxyInfo["ip"], proxyInfo["port"])}
                         try:
-                            r = requests.post(url=url, headers=headers, verify=False, proxies=proxies, data=json.dumps(datas))
+                            r = requests.post(url=url, headers=headers, timeout=30, verify=False, proxies=proxies, data=json.dumps(datas))
                             proxyList.pop(0)
                             r.raise_for_status()
-                            if r.status_code == 200:
+                            if str(r.status_code) == "200":
                                 getFlag == True
                                 break
                         except Exception as e:
-
                             print(10057, url, e)
                             strSql = "update proxy_list set weights = weights+1 where ip='{0}' and port='{1}' and type='{2}'".format(proxyInfo["ip"], proxyInfo["port"], proxyInfo["type"])
                             self.mysqlConn.execute(strSql)
-
             except Exception as e:
                 # traceback.print_exc()
                 print(10055, url, e)
@@ -331,6 +347,9 @@ class Get_1024_MagnetLink_Main():
             if "www1.downsx" in nodeContent:
                 divNodesList = re.split(""""_blank">http://www1.downsx..+?</a>""", nodeContent)
                 del divNodesList[-1]
+            elif "hgcdown" in nodeContent:
+                divNodesList = re.split(""""_blank">http://www1.hgcdown.+?</a>""", nodeContent)
+                del divNodesList[-1]
             elif "uptorrentfilespacedownhostabc" in nodeContent:
                 divNodesList = re.split(""""_blank">http://www3.uptorrentfilespacedownhostabc.+?</a>""", nodeContent)
                 del divNodesList[-1]
@@ -340,10 +359,15 @@ class Get_1024_MagnetLink_Main():
                 divNodesList = re.split("""<br/><br/><br/><br/><br/><br/>""", nodeContent)
             elif "<br/><br/><br/><br/><br/>" in nodeContent:
                 divNodesList = re.split("""<br/><br/><br/><br/><br/>""", nodeContent)
+            elif "￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣" in nodeContent:
+                divNodesList = re.split("""￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣""", nodeContent)
             elif "--------" in nodeContent:
                 divNodesList = re.split("""--------""", nodeContent)
             elif "============" in nodeContent:
                 divNodesList = re.split("""============""", nodeContent)
+            else:
+                print("10778 未找到分割规则！！！")
+                raise "10778 未找到分割规则！！！ {0}".format(postNode)
 
             divNodeCnt = len(divNodesList)
             n = 0 # 单一帖子资源组编号 照片+种子资源为一组
@@ -396,14 +420,17 @@ class Get_1024_MagnetLink_Main():
                     print("19365 {0} 种子下载链接：{1}".format(postNode["id"], torrentLink))
 
                     if "downsx" in torrentLink or "vodxxtv" in torrentLink or "hgcdown" in torrentLink:
-                        torrent_r = self.down_torrent(torrentLink)
-                        text = torrent_r.content.decode('utf-8', 'ignore')
-                        torrentDownPre = re.compile(r"""href="(.+?)">下載檔案</a>""")
 
-                        torrentDownExten = self.Is_Re_Correctly(text, torrentDownPre)
-                        print(torrentDownExten)
-                        if torrentDownExten is False:
-                            raise "10097 torrentDownExten 未能得到想要的结果！"
+                        while True:
+                            torrent_r = self.down_torrent(torrentLink)
+                            text = torrent_r.content.decode('utf-8', 'ignore')
+                            torrentDownPre = re.compile(r"""href="(.+?)">下載檔案</a>""")
+
+                            torrentDownExten = self.Is_Re_Correctly(text, torrentDownPre)
+
+                            if torrentDownExten is not False:
+                                break
+                                # raise "10097 torrentDownExten 未能得到想要的结果！[{0}]".format(text)
 
                         torrentArr = torrentLink.split("/torrent")
 

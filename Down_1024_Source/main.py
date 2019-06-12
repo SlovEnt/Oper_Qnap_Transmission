@@ -4,6 +4,7 @@ __date__ = '2019/6/6 21:45'
 
 import time
 import os
+import pathlib
 import re
 import shutil
 import requests
@@ -49,7 +50,7 @@ def main():
     gmm = Get_1024_MagnetLink_Main(mysqlConn, ROOT_URL, DOWN_FLODERS, POST_ROOT_URL)
 
     # 下载的最大帖子列表页数
-    postsMaxNum = 3
+    postsMaxNum = 1
 
     # 定义数组 用于存放帖子信息
     postInfos = []
@@ -113,7 +114,7 @@ def main():
 
         # #****************************************
         # # 当单一帖子出现问题 用以下方式过滤
-        # if postNode["id"] != "a_ajax_4116754":
+        # if postNode["id"] != "a_ajax_4120070":
         #     continue
         # #****************************************
 
