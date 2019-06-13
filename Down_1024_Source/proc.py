@@ -266,31 +266,21 @@ class Get_1024_MagnetLink_Main():
                 break
 
             try:
+
                 headers = get_new_headers(url)
                 headers["Referer"] = url
                 headers["Accept"] = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"
                 headers["Accept-Encoding"] = "gzip, deflate"
                 headers["Upgrade-Insecure-Requests"] = "1"
 
-
                 strLetterNum=string.ascii_letters+string.digits
 
-
-                # datas = {'depwhk': 'zwax',
-                #          "isrqxu": "8",
-                #          "agfshe": "2z54g3",
-                #          "yqjexm": "ccxbd3",
-                #          "ngpuru": "tysd3",
-                #             "".join(random.sample(strLetterNum, 6)) :"".join(random.sample(strLetterNum, 6)),
-                #             "".join(random.sample(strLetterNum, 6)) :"".join(random.sample(strLetterNum, 6)),
-                #             "".join(random.sample(strLetterNum, 6)) :"".join(random.sample(strLetterNum, 6)),
-                #          }
                 datas = {
-                            "".join(random.sample(strLetterNum, 6)) :"".join(random.sample(strLetterNum, 1)),
-                            "".join(random.sample(strLetterNum, 6)) :"".join(random.sample(strLetterNum, 2)),
-                            "".join(random.sample(strLetterNum, 6)) :"".join(random.sample(strLetterNum, 4)),
-                            "".join(random.sample(strLetterNum, 6)) :"".join(random.sample(strLetterNum, 4)),
-                            "".join(random.sample(strLetterNum, 6)) :"".join(random.sample(strLetterNum, 3)),
+                            "".join(random.sample(strLetterNum, 6)) :"".join(random.sample(strLetterNum, 6)),
+                            "".join(random.sample(strLetterNum, 6)) :"".join(random.sample(strLetterNum, 6)),
+                            "".join(random.sample(strLetterNum, 6)) :"".join(random.sample(strLetterNum, 6)),
+                            "".join(random.sample(strLetterNum, 6)) :"".join(random.sample(strLetterNum, 6)),
+                            "".join(random.sample(strLetterNum, 6)) :"".join(random.sample(strLetterNum, 6)),
                          }
 
                 downCnt += 1
