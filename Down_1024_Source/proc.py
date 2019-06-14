@@ -12,10 +12,27 @@ import random
 import time
 import json
 import random,string
+from selenium import webdriver
+from ResPacks.UsedCommFuncs import Get_Param_Info
 
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+# 参数加载区
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+CONFIG_FILE = "{0}/Config.ini".format(BASE_DIR)
+globParaList = Get_Param_Info(CONFIG_FILE)
+
+
+CHROME_PATH = globParaList["CHORME_PATH"]
+
+SAVE_SCREE_FILE = r"screenshots"
+
+chromeOptions = webdriver.ChromeOptions()
+chromeOptions.binary_location = r"{0}\{1}".format(CHROME_PATH, "chrome.exe")
+chromeDriver = r"{0}\{1}".format(CHROME_PATH, "chromedriver.exe")
+chromeOptions.add_argument('--headless')
+chromeOptions.add_argument('--disable-gpu')
 
 class Get_1024_MagnetLink_Main():
 
@@ -259,6 +276,7 @@ class Get_1024_MagnetLink_Main():
         proxyFlag = "N" # 代理使用标志
         proxyList = get_proxy_list(self.mysqlConn) # 获取代理列表
         downCnt = 0
+
         while getFlag == False:
 
             # 下载10次则直接跳出
@@ -309,6 +327,15 @@ class Get_1024_MagnetLink_Main():
                 print(10055, url, e)
 
                 # 本地IP尝试下载3次
+                driver = webdriver.Chrome(executable_path=chromeDriver, chrome_options=chromeOptions)
+                browerLength = 1280
+                browerWidth = 4096
+                driver.set_window_size(browerLength, browerWidth)
+                driver.get(url)
+                driver.implicitly_wait(30)
+                driver.close()
+                driver.quit()
+
                 if downCnt>3:
                     proxyFlag = "Y"
 
