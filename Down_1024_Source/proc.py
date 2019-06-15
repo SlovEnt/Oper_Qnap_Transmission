@@ -14,6 +14,7 @@ import json
 import random,string
 from selenium import webdriver
 from ResPacks.UsedCommFuncs import Get_Param_Info
+from multiprocessing import Pool
 
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -233,7 +234,7 @@ class Get_1024_MagnetLink_Main():
                 headers = get_new_headers(url)
                 downCnt += 1
                 if proxyFlag == "N":
-                    r = requests.get(url=url, headers=headers, timeout=30, verify=False)
+                    r = requests.get(url=url, headers=headers, timeout=60, verify=False)
                     r.raise_for_status()
                     if r.status_code == 200:
                         getFlag == True
@@ -242,7 +243,7 @@ class Get_1024_MagnetLink_Main():
                         print("10998 获取代理", proxyInfo)
                         proxies = {proxyInfo["type"]: '{0}://{1}:{2}'.format(proxyInfo["type"], proxyInfo["ip"], proxyInfo["port"])}
                         try:
-                            r = requests.get(url=url, headers=headers, timeout=30, verify=False, proxies=proxies)
+                            r = requests.get(url=url, headers=headers, timeout=60, verify=False, proxies=proxies)
                             proxyList.pop(0)
                             r.raise_for_status()
                             if r.status_code == 200:
@@ -330,11 +331,15 @@ class Get_1024_MagnetLink_Main():
                 driver = webdriver.Chrome(executable_path=chromeDriver, chrome_options=chromeOptions)
                 browerLength = 1280
                 browerWidth = 4096
-                driver.set_window_size(browerLength, browerWidth)
-                driver.get(url)
-                driver.implicitly_wait(30)
-                driver.close()
-                driver.quit()
+                # driver.set_window_size(browerLength, browerWidth)
+                try:
+                    driver.get(url)
+                    driver.implicitly_wait(30)
+                except Exception as e:
+                    print(15999, e)
+                finally:
+                    driver.close()
+                    driver.quit()
 
                 if downCnt>3:
                     proxyFlag = "Y"
@@ -395,6 +400,7 @@ class Get_1024_MagnetLink_Main():
 
                 n += 1
                 filePrefix = '%03d' % n
+
                 print("------------------ {0} - {1}/{2} ------------------".format(postNode["id"], filePrefix, '%03d' % divNodeCnt))
                 # divNode = divNode.replace("=", "")
                 divNode = divNode.replace('<div class"f14" id"read_tpc">', "")

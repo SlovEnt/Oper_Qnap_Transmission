@@ -14,6 +14,7 @@ from ResPacks import torndb
 from ResPacks.UsedCommFuncs import Get_Param_Info
 from proc import get_html_all_content, Get_1024_MagnetLink_Main
 import traceback
+from multiprocessing import Pool
 
 
 # 参数加载区
@@ -44,10 +45,75 @@ DOWN_FLODERS = globParaList["Down_1024_Floders"]
 # 记录帖子下载标志的数据库后台表
 tableName = globParaList["Table_Name"]
 
+gmm = Get_1024_MagnetLink_Main(mysqlConn, ROOT_URL, DOWN_FLODERS, POST_ROOT_URL)
+
+def sing_process(postNode):
+    # 下载存放目录
+    downSubFloder = "{0}\{1}".format(DOWN_FLODERS, postNode["folder_name"])
+
+    whereDict = OrderedDict()
+    whereDict["web_name"] = postNode["web_name"]
+    whereDict["id"] = postNode["id"]
+
+    rtnDatas = gmm.Table_Row_Is_Exist(tableName, whereDict)
+
+    if rtnDatas["CNT"] == 0:
+        rtnMsg = gmm.Inser_Init_TaskLog(tableName, postNode)
+
+    whereDict["search_flag"] = "1"
+    rtnDatas = gmm.Table_Row_Is_Exist(tableName, whereDict)
+
+    if rtnDatas["CNT"] == 1:
+        print("10096 id = {0} 帖子标题 = {1} 已经完成下载，无需重复下载！！".format(postNode["id"], postNode["title"]))
+        # continue
+        return False
+    # 如果不存在则创建目录
+    isExists = os.path.exists(downSubFloder)
+    if not isExists:
+        os.makedirs(downSubFloder)
+
+    # 单一帖子循环下载
+    print("10002 下载帖子地址为：{0}，帖子ID为：{1}，帖子标题为：{2}，存放子目录为：{3}。".format(
+        postNode["href"],
+        postNode["id"],
+        postNode["title"],
+        downSubFloder,
+    ))
+    subPostHtml = gmm.get_html_all_content(postNode["href"], "td_tpc", "utf-8")
+
+    # 保存帖子网页内容
+    pageFileName = r"{0}\{1}.html".format(downSubFloder, postNode["id"])
+    with open(pageFileName, "w", encoding='utf-8') as f:
+        f.write(subPostHtml)
+
+    rtnMsg = gmm.down_torrent_and_images(subPostHtml, postNode, downSubFloder)
+
+    whereDict = {}
+    whereDict["web_name"] = postNode["web_name"]
+    whereDict["id"] = postNode["id"]
+
+    if rtnMsg is False:
+        print("10044 下载帖子地址为：{0}，帖子ID为：{1}，帖子标题为：{2}，因某些原因导致下载失败。".format(
+            postNode["href"],
+            postNode["id"],
+            postNode["title"],
+        ))
+        shutil.rmtree(downSubFloder)
+        postNode["search_flag"] = "2"
+
+    else:
+        print("10044 下载帖子地址为：{0}，帖子ID为：{1}，帖子标题为：{2}，下载成功。".format(
+            postNode["href"],
+            postNode["id"],
+            postNode["title"],
+        ))
+        postNode["search_flag"] = "1"
+
+    gmm.Update_Init_TaskLog(tableName, whereDict, postNode)
+    print("\n")
 
 def main():
 
-    gmm = Get_1024_MagnetLink_Main(mysqlConn, ROOT_URL, DOWN_FLODERS, POST_ROOT_URL)
 
     # 下载的最大帖子列表页数
     postsMaxNum = 1
@@ -108,7 +174,11 @@ def main():
                 break
 
     n = 120000
+
+    p = Pool(5)
+
     for postNode in postInfos:
+
         # n += 1
         # print(n, postNode)
 
@@ -118,76 +188,16 @@ def main():
         #     continue
         # #****************************************
 
-        # 下载存放目录
-        downSubFloder = "{0}\{1}".format(DOWN_FLODERS, postNode["folder_name"])
+        # sing_process(postNode)
+        p.apply_async(sing_process, (postNode,))
 
-        whereDict = OrderedDict()
-        whereDict["web_name"] = postNode["web_name"]
-        whereDict["id"] = postNode["id"]
+    p.close()
+    p.join()    # behind close() or terminate()
 
-        rtnDatas = gmm.Table_Row_Is_Exist(tableName, whereDict)
-
-        if rtnDatas["CNT"] == 0:
-            rtnMsg = gmm.Inser_Init_TaskLog(tableName, postNode)
-
-        whereDict["search_flag"] = "1"
-        rtnDatas = gmm.Table_Row_Is_Exist(tableName, whereDict)
-
-        if rtnDatas["CNT"] == 1:
-            print("10096 id = {0} 帖子标题 = {1} 已经完成下载，无需重复下载！！".format(postNode["id"], postNode["title"]))
-            continue
-
-        # 如果不存在则创建目录
-        isExists = os.path.exists(downSubFloder)
-        if not isExists:
-            os.makedirs(downSubFloder)
-
-        # 单一帖子循环下载
-        print("10002 下载帖子地址为：{0}，帖子ID为：{1}，帖子标题为：{2}，存放子目录为：{3}。".format(
-            postNode["href"],
-            postNode["id"],
-            postNode["title"],
-            downSubFloder,
-        ))
-        subPostHtml = gmm.get_html_all_content(postNode["href"], "td_tpc", "utf-8")
-
-        # 保存帖子网页内容
-        pageFileName = r"{0}\{1}.html".format(downSubFloder, postNode["id"])
-        with open(pageFileName, "w", encoding='utf-8') as f:
-            f.write(subPostHtml)
-
-        rtnMsg = gmm.down_torrent_and_images(subPostHtml, postNode, downSubFloder)
-
-        whereDict = {}
-        whereDict["web_name"] = postNode["web_name"]
-        whereDict["id"] = postNode["id"]
-
-        if rtnMsg is False:
-            print("10044 下载帖子地址为：{0}，帖子ID为：{1}，帖子标题为：{2}，因某些原因导致下载失败。".format(
-                postNode["href"],
-                postNode["id"],
-                postNode["title"],
-            ))
-            shutil.rmtree(downSubFloder)
-            postNode["search_flag"] = "2"
-
-        else:
-            print("10044 下载帖子地址为：{0}，帖子ID为：{1}，帖子标题为：{2}，下载成功。".format(
-                postNode["href"],
-                postNode["id"],
-                postNode["title"],
-            ))
-            postNode["search_flag"] = "1"
-
-        gmm.Update_Init_TaskLog(tableName, whereDict, postNode)
-        print("\n")
-
-
-# print("10002 下载帖子地址为：{0}，存放子目录为：{1}。".format(postNode["href"], folderName))
 
 if __name__ == '__main__':
     try:
         main()
     except Exception as e:
         print(e)
-        # traceback.print_exc()
+        traceback.print_exc()
