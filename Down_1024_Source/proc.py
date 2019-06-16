@@ -240,7 +240,7 @@ class Get_1024_MagnetLink_Main():
                         getFlag == True
                 else:
                     for proxyInfo in proxyList:
-                        print("10998 获取代理", proxyInfo)
+                        print("10998 获取代理", '{0}://{1}:{2}'.format(proxyInfo["type"], proxyInfo["ip"], proxyInfo["port"]))
                         proxies = {proxyInfo["type"]: '{0}://{1}:{2}'.format(proxyInfo["type"], proxyInfo["ip"], proxyInfo["port"])}
                         try:
                             r = requests.get(url=url, headers=headers, timeout=60, verify=False, proxies=proxies)
@@ -310,7 +310,7 @@ class Get_1024_MagnetLink_Main():
                         getFlag = True
                 else:
                     for proxyInfo in proxyList:
-                        print("10998 获取代理", proxyInfo)
+                        print("10998 获取代理", '{0}://{1}:{2}'.format(proxyInfo["type"], proxyInfo["ip"], proxyInfo["port"]))
                         proxies = {proxyInfo["type"]: '{0}://{1}:{2}'.format(proxyInfo["type"], proxyInfo["ip"], proxyInfo["port"])}
                         try:
                             r = requests.post(url=url, headers=headers, timeout=30, verify=False, proxies=proxies, data=json.dumps(datas))
@@ -475,6 +475,160 @@ class Get_1024_MagnetLink_Main():
 
         return downFlag
 
+    def multi_down_torrent_and_images(self, subPostHtml, postNode, downSubFloder):
+
+        try:
+            downFlag = True
+
+            if subPostHtml == "":
+                return False
+
+            if "http://koxzp.com/" in subPostHtml:
+                return False
+
+            soup = BeautifulSoup(subPostHtml, 'html.parser')
+            nodes = soup.find_all(name="div", attrs={"class":"f14",'id':"read_tpc"})
+            nodeContent = str(nodes[0])
+
+            # print("--------\n{0}\n------------".format(nodeContent))
+
+            if "www1.downsx" in nodeContent:
+                divNodesList = re.split(""""_blank">http://www1.downsx..+?</a>""", nodeContent)
+                del divNodesList[-1]
+            elif "hgcdown" in nodeContent:
+                divNodesList = re.split(""""_blank">http://www1.hgcdown.+?</a>""", nodeContent)
+                del divNodesList[-1]
+            elif "uptorrentfilespacedownhostabc" in nodeContent:
+                divNodesList = re.split(""""_blank">http://www3.uptorrentfilespacedownhostabc.+?</a>""", nodeContent)
+                del divNodesList[-1]
+            elif "<br/><br/><br/><br/><br/><br/><br/>" in nodeContent:
+                divNodesList = re.split("""<br/><br/><br/><br/><br/><br/><br/>""", nodeContent)
+            elif "<br/><br/><br/><br/><br/><br/>" in nodeContent:
+                divNodesList = re.split("""<br/><br/><br/><br/><br/><br/>""", nodeContent)
+            elif "<br/><br/><br/><br/><br/>" in nodeContent:
+                divNodesList = re.split("""<br/><br/><br/><br/><br/>""", nodeContent)
+            elif "￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣" in nodeContent:
+                divNodesList = re.split("""￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣￣""", nodeContent)
+            elif "--------" in nodeContent:
+                divNodesList = re.split("""--------""", nodeContent)
+            elif "============" in nodeContent:
+                divNodesList = re.split("""============""", nodeContent)
+            else:
+                print("10778 未找到分割规则！！！")
+                raise "10778 未找到分割规则！！！ {0}".format(postNode)
+
+            divNodeCnt = len(divNodesList)
+            n = 0 # 单一帖子资源组编号 照片+种子资源为一组
+
+            p = Pool(5)
+
+            for divNode in divNodesList:
+
+                if "http" not in divNode:
+                    continue
+
+                n += 1
+                filePrefix = '%03d' % n
+
+                dictParam = OrderedDict()
+                dictParam["postNode"] = postNode
+                dictParam["divNode"] = divNode
+                dictParam["filePrefix"] = filePrefix
+                dictParam["divNodeCnt"] = divNodeCnt
+                dictParam["downSubFloder"] = downSubFloder
+
+                p.apply_async(self.sing_down_image_and_torrent, (dictParam,))
+
+            p.close()
+            p.join()  # behind close() or terminate()
+
+            downFlag = True
+
+        except Exception as e:
+            # print("10899 {0} 单一影片原始节点信息 {1}".format(postNode["id"], divNode))
+            traceback.print_exc()
+            print(10067, e )
+            return False
+
+        return downFlag
+
+    def sing_down_image_and_torrent(self, dictParam):
+
+        try:
+
+            postNode = dictParam["postNode"]
+            divNode = dictParam["divNode"]
+            filePrefix = dictParam["filePrefix"]
+            divNodeCnt = dictParam["divNodeCnt"]
+            downSubFloder = dictParam["downSubFloder"]
+
+            print("------------------ {0} - {1}/{2} ------------------".format(postNode["id"], filePrefix, '%03d' % divNodeCnt))
+            # divNode = divNode.replace("=", "")
+            divNode = divNode.replace('<div class"f14" id"read_tpc">', "")
+            # divNode = divNode.replace("<br/><br/>", "<br/>")
+            # divNode = divNode.replace("<br/><br/>", "<br/>")
+            print("10899 {0} 单一影片原始节点信息 {1}".format(postNode["id"], divNode))
+
+            # 从节点中获取所有图片资源链接
+            imgPre = re.compile(r"""src="(.+?)"/>""")
+            imgLinks = self.Is_Re_Correctly(divNode, imgPre, "图片链接")
+            if imgLinks is False:
+                pass
+
+            for imgLink in imgLinks:
+                imgFileName = os.path.basename(imgLink)
+                if "." not in imgFileName:
+                    continue
+                imgFullPathFile = "{0}\{3}_{1}_{2}".format(downSubFloder, filePrefix, imgFileName, postNode["id"])
+                print("19885 {0} 开始下载图片 {1}。".format(postNode["id"], imgLink, imgFullPathFile))
+                img = self.down_image(imgLink)
+                with open(imgFullPathFile, "wb") as f:
+                    f.write(img.content)
+
+            # 从节点中获取所有种子资源链接
+            torrentPre = re.compile(r"""<a href="(.+?)" target=""")
+            torrentLinks = self.Is_Re_Correctly(divNode, torrentPre, "种子链接")
+            for torrentLink in torrentLinks:
+
+                if "kccdk.com" in torrentLink:
+                    continue
+
+                if "motelppp" in torrentLink and "downsx" in divNode:
+                    '''可能一个节点会有两种BT连接，只取downsx网站的种子'''
+                    continue
+
+                if "movieppp" in torrentLink and "downsx" in divNode:
+                    '''可能一个节点会有两种BT连接，只取downsx网站的种子'''
+                    continue
+
+                print("19365 {0} 种子下载链接：{1}".format(postNode["id"], torrentLink))
+
+                if "downsx" in torrentLink or "vodxxtv" in torrentLink or "hgcdown" in torrentLink:
+
+                    while True:
+                        torrent_r = self.down_torrent(torrentLink)
+                        text = torrent_r.content.decode('utf-8', 'ignore')
+                        torrentDownPre = re.compile(r"""href="(.+?)">下載檔案</a>""")
+
+                        torrentDownExten = self.Is_Re_Correctly(text, torrentDownPre)
+
+                        if torrentDownExten is not False:
+                            break
+                            # raise "10097 torrentDownExten 未能得到想要的结果！[{0}]".format(text)
+
+                    torrentArr = torrentLink.split("/torrent")
+
+                    newDownLink = "{0}{1}".format(torrentArr[0], torrentDownExten[0])
+                    print("19366 {0} 种子真实链接：{1}".format(postNode["id"], newDownLink))
+
+                    torrent = self.down_torrent(newDownLink)
+                    torrentFullPathFile = "{0}\{2}_{1}.torrent".format(downSubFloder, filePrefix, postNode["id"])
+                    with open(torrentFullPathFile, "wb") as code:
+                        code.write(torrent.content)
+
+        except Exception as e:
+            print(e)
+            traceback.print_exc()
 
     def Get_BBS169_Forum_Contant(self, forumInfo):
         pass

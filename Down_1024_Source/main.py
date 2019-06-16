@@ -87,6 +87,7 @@ def sing_process(postNode):
         f.write(subPostHtml)
 
     rtnMsg = gmm.down_torrent_and_images(subPostHtml, postNode, downSubFloder)
+    # rtnMsg = gmm.multi_down_torrent_and_images(subPostHtml, postNode, downSubFloder)
 
     whereDict = {}
     whereDict["web_name"] = postNode["web_name"]
@@ -184,7 +185,7 @@ def main():
 
         # #****************************************
         # # 当单一帖子出现问题 用以下方式过滤
-        # if postNode["id"] != "a_ajax_4120070":
+        # if postNode["id"] != "a_ajax_4128182":
         #     continue
         # #****************************************
 
