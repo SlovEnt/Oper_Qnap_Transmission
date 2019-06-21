@@ -70,7 +70,7 @@ def down_tpb_magent_info(singCategory):
             tpbDict["rs_type"] = node.find_all(name="td")[0].center.find_all(name="a")[1].text
 
             tpbDict["up_datetime"], tpbDict["up_size"], tpbDict["up_user"] = re.compile(r'''Uploaded (.+?), Size (.+?), ULed by (.+?)&''').findall(otherStr)[0]
-            print(tpbDict["up_datetime"])
+            # print(tpbDict["up_datetime"])
             tpbDict["up_datetime"] = tpc.format_datetime(tpbDict["up_datetime"])
 
             tpbDict["down_flag"] = 0
