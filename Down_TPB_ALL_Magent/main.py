@@ -18,6 +18,7 @@ from bs4 import BeautifulSoup
 tpc = tpb_proc_class(mysqlConn,globParaList["TPB_ROOT_URL"])
 tableName = "get_tpb_all_magnet"
 
+
 def down_tpb_magent_info(singCategory):
 
     siteWeb = globParaList["TPB_ROOT_URL"]

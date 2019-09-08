@@ -4,6 +4,7 @@ Config.ini
 *.jpg
 __pycache__/
 .idea/
+log/
 
 *.DS_Store
 

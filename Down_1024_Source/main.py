@@ -31,7 +31,7 @@ mysqlConn = torndb.Connection(
 )
 
 # 域名
-DOMIN_NAME = "http://k6.csnjcbnxdnb.pw"
+DOMIN_NAME = "http://p3.csgfnmdb.xyz"
 
 # 最新合集版块首页
 ROOT_URL = "{0}/pw/thread.php?fid=3".format(DOMIN_NAME)
@@ -64,7 +64,7 @@ def sing_process(postNode):
     rtnDatas = gmm.Table_Row_Is_Exist(tableName, whereDict)
 
     if rtnDatas["CNT"] == 1:
-        print("10096 id = {0} 帖子标题 = {1} 已经完成下载，无需重复下载！！".format(postNode["id"], postNode["title"]))
+        print("10096 id：{0}， 帖子标题：{1}。已经完成下载，无需重复下载！！".format(postNode["id"], postNode["title"]))
         # continue
         return False
     # 如果不存在则创建目录
@@ -117,7 +117,7 @@ def main():
 
 
     # 下载的最大帖子列表页数
-    postsMaxNum = 1
+    postsMaxNum = 3
 
     # 定义数组 用于存放帖子信息
     postInfos = []
@@ -184,8 +184,8 @@ def main():
         # print(n, postNode)
 
         # #****************************************
-        # # 当单一帖子出现问题 用以下方式过滤
-        # if postNode["id"] != "a_ajax_4128182":
+        # 当单一帖子出现问题 用以下方式过滤
+        # if postNode["id"] != "a_ajax_4209688":
         #     continue
         # #****************************************
 

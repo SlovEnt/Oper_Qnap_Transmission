@@ -30,8 +30,10 @@ CHROME_PATH = globParaList["CHORME_PATH"]
 SAVE_SCREE_FILE = r"screenshots"
 
 chromeOptions = webdriver.ChromeOptions()
-chromeOptions.binary_location = r"{0}\{1}".format(CHROME_PATH, "chrome.exe")
-chromeDriver = r"{0}\{1}".format(CHROME_PATH, "chromedriver.exe")
+# chromeOptions.binary_location = r"{0}\{1}".format(CHROME_PATH, "chrome.exe")
+# chromeDriver = r"{0}\{1}".format(CHROME_PATH, "chromedriver.exe")
+chromeOptions.binary_location = globParaList["CHORME_PATH"]
+chromeDriver = globParaList["CHROMEDRIVER_PATH"]
 chromeOptions.add_argument('--headless')
 chromeOptions.add_argument('--disable-gpu')
 
@@ -375,6 +377,9 @@ class Get_1024_MagnetLink_Main():
             elif "uptorrentfilespacedownhostabc" in nodeContent:
                 divNodesList = re.split(""""_blank">http://www3.uptorrentfilespacedownhostabc.+?</a>""", nodeContent)
                 del divNodesList[-1]
+            elif "adns1.vodxxtv" in nodeContent:
+                divNodesList = re.split(""""_blank">http://adns1.vodxxtv.+?</a>""", nodeContent)
+                del divNodesList[-1]
             elif "<br/><br/><br/><br/><br/><br/><br/>" in nodeContent:
                 divNodesList = re.split("""<br/><br/><br/><br/><br/><br/><br/>""", nodeContent)
             elif "<br/><br/><br/><br/><br/><br/>" in nodeContent:
@@ -429,6 +434,9 @@ class Get_1024_MagnetLink_Main():
                 torrentLinks = self.Is_Re_Correctly(divNode, torrentPre, "种子链接")
                 for torrentLink in torrentLinks:
 
+                    torrentLink = torrentLink.strip()
+                    torrentLink = torrentLink.replace(" ", "")
+
                     if "kccdk.com" in torrentLink:
                         continue
 
@@ -464,6 +472,9 @@ class Get_1024_MagnetLink_Main():
                         torrentFullPathFile = "{0}\{2}_{1}.torrent".format(downSubFloder, filePrefix, postNode["id"])
                         with open(torrentFullPathFile, "wb") as code:
                             code.write(torrent.content)
+
+                    elif "motelppp" in torrentLinks:
+                        print(torrentLinks)
 
             downFlag = True
 
@@ -554,6 +565,8 @@ class Get_1024_MagnetLink_Main():
 
     def sing_down_image_and_torrent(self, dictParam):
 
+        print("ds")
+
         try:
 
             postNode = dictParam["postNode"]
@@ -599,6 +612,10 @@ class Get_1024_MagnetLink_Main():
 
                 if "movieppp" in torrentLink and "downsx" in divNode:
                     '''可能一个节点会有两种BT连接，只取downsx网站的种子'''
+                    continue
+
+                if ".jpg" in torrentLink:
+                    '''可能会把图片链接解析为种子链接'''
                     continue
 
                 print("19365 {0} 种子下载链接：{1}".format(postNode["id"], torrentLink))
